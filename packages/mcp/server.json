@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Whichart/whichart",
+  "title": "Whichart",
+  "description": "Pick the right chart for your data, get tested code and edge-case rules, and review a chart before showing it.",
+  "websiteUrl": "https://whichart.github.io/agents/",
+  "repository": {
+    "url": "https://github.com/Whichart/whichart.github.io",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@whichart/mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

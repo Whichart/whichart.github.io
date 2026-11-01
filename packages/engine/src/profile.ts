@@ -194,3 +194,77 @@ function summarise(columns: Column[], rows: number): string {
   });
   return [`${rows} row${rows === 1 ? '' : 's'}`, ...parts].join(' · ');
 }
+
+/** A description of data, for agents that won't (or can't) send the rows themselves. */
+export interface DataSchema {
+  rows: number;
+  columns: {
+    name: string;
+    /** date; number; text (a category); stage (ordered steps); period (0, 1, 2… since a start); id; place. */
+    type: 'date' | 'number' | 'text' | 'stage' | 'period' | 'id' | 'place';
+    /** Distinct values (categories, stages, dates). */
+    distinct?: number;
+    min?: number;
+    max?: number;
+    /** A number column holding the previous period's value. */
+    previous?: boolean;
+    /** Longest text value, in characters. */
+    maxLength?: number;
+    interval?: Interval;
+    /** Missing dates between the first and last. */
+    gaps?: boolean;
+  }[];
+}
+
+const SCHEMA_ROLE: Record<DataSchema['columns'][number]['type'], Role> = {
+  date: 'time',
+  number: 'measure',
+  text: 'category',
+  stage: 'ordinal',
+  period: 'ordinal',
+  id: 'id',
+  place: 'geo',
+};
+
+/** Build the same profile `profile()` would, from a description instead of rows. */
+export function profileFromSchema(schema: DataSchema): Profile {
+  const columns: Column[] = schema.columns.map((c) => ({
+    name: c.name,
+    role: SCHEMA_ROLE[c.type],
+    ...(c.previous ? { comparison: true } : {}),
+    distinct: c.distinct ?? (c.type === 'date' ? schema.rows : 0),
+    missing: 0,
+    ...(c.min !== undefined ? { min: c.min } : {}),
+    ...(c.max !== undefined ? { max: c.max } : {}),
+    ...(c.maxLength !== undefined ? { maxLength: c.maxLength } : {}),
+    ...(c.type === 'date' ? { interval: c.interval ?? 'irregular', gaps: c.gaps ? 1 : 0 } : {}),
+    because: c.type === 'period' ? 'numbered periods (0, 1, 2…) since a start' : `described as ${c.type}`,
+  }));
+  const of = (role: Role) => columns.filter((c) => c.role === role);
+  const time = of('time')[0];
+  const measures = of('measure').filter((c) => !c.comparison);
+  const category = of('category')[0] ?? of('geo')[0];
+  const ordinal = of('ordinal')[0];
+  const mins = measures.map((m) => m.min).filter((v): v is number => v !== undefined);
+  const maxs = measures.map((m) => m.max).filter((v): v is number => v !== undefined);
+  const metrics: Metrics = {
+    rows: schema.rows,
+    timeFields: of('time').length,
+    measureFields: measures.length,
+    categoryFields: of('category').length,
+    ordinalFields: of('ordinal').length,
+    geoFields: of('geo').length,
+    categories: category?.distinct ?? ordinal?.distinct ?? 0,
+    series: time && category ? category.distinct || 1 : Math.max(1, measures.length),
+    pointsPerSeries: time ? time.distinct : category ? category.distinct : ordinal ? ordinal.distinct : schema.rows,
+    hasNegatives: mins.some((v) => v < 0),
+    allZeros: mins.length > 0 && mins.every((v) => v === 0) && maxs.every((v) => v === 0),
+    hasTimeGaps: (time?.gaps ?? 0) > 0,
+    hasPrevious: of('measure').some((c) => c.comparison) || (time?.distinct ?? 0) >= 2,
+    maxLabelLength: Math.max(0, ...columns.map((c) => c.maxLength ?? 0)),
+    outlierRatio: 1,
+    sumsToWhole: !!category && measures.length > 0 && !mins.some((v) => v < 0),
+    periodIndex: schema.columns.some((c) => c.type === 'period'),
+  };
+  return { columns, metrics, goals: inferGoals(metrics), summary: summarise(columns, schema.rows) };
+}

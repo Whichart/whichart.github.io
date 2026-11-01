@@ -172,3 +172,12 @@ test('recommend: donut refuses negative parts with a bar suggestion', () => {
   const donut = recommend({ csv: 'channel,profit\nWeb,8400\nApp,5100\nRetail,-2400\n' }).avoid.find((a) => a.id === 'donut')!;
   assert.equal(donut.reasons[0].suggest, 'bar-horizontal');
 });
+
+test('schema input: describing the data gives the same top pick as sending it', () => {
+  const schema = { rows: 90, columns: [{ name: 'date', type: 'date' as const, distinct: 90, interval: 'day' as const }, { name: 'value', type: 'number' as const, min: 1500, max: 3500 }] };
+  assert.equal(recommend({ schema }).ranked[0].id, recommend({ csv: lineSample }).ranked[0].id);
+  const cohort = { rows: 21, columns: [{ name: 'cohort', type: 'date' as const, distinct: 6, interval: 'month' as const }, { name: 'period', type: 'period' as const, distinct: 6 }, { name: 'customers', type: 'number' as const, min: 0 }] };
+  assert.equal(recommend({ schema: cohort }).ranked[0].id, 'cohort-heatmap');
+  const funnel = { rows: 5, columns: [{ name: 'stage', type: 'stage' as const, distinct: 5 }, { name: 'people', type: 'number' as const, min: 3900 }] };
+  assert.equal(recommend({ schema: funnel }).ranked[0].id, 'funnel');
+});
