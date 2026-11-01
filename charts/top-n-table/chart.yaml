@@ -1,0 +1,119 @@
+id: top-n-table
+name: Top-N table
+aliases: [top 10 table, leaderboard, ranked table, best sellers table, table with inline bars]
+status: ready
+summary: A ranked list with exact values, shares and inline bars, so you can read the numbers and see the gaps.
+
+goals: [ranking, compare]
+
+preview: { width: 480, height: 360 }
+
+data:
+  fields:
+    - role: category
+      count: { min: 1, max: 1 }
+      description: The item being ranked, e.g. product, page or customer.
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+  notes: Duplicates are summed. Beyond N rows (10 by default), the rest are summed into "Other (n)".
+
+fit:
+  rules:
+    - when: { metric: categoryFields, op: "=", value: 0 }
+      effect: exclude
+      reason: A ranking needs items to rank; there's no category column.
+    - when: { metric: timeFields, op: ">", value: 0 }
+      effect: penalty
+      weight: 0.4
+      reason: Your data runs over time; a ranking sums it and loses the trend.
+      suggest: line
+    - when: { metric: goal, op: "=", value: ranking }
+      effect: boost
+      weight: 0.45
+      reason: A ranked list with exact values is what "what sells best?" needs.
+    - when: { metric: categories, op: ">", value: 8 }
+      effect: boost
+      weight: 0.2
+      reason: Many items read better as rows than as bars.
+    - when: { metric: maxLabelLength, op: ">", value: 20 }
+      effect: boost
+      weight: 0.1
+      reason: Long names fit in table rows.
+    - when: { metric: categories, op: "<", value: 4 }
+      effect: penalty
+      weight: 0.3
+      reason: With only a few items, a bar chart says it faster.
+      suggest: bar-horizontal
+
+context:
+  space: { tile: poor, card: good, half: good, full: good }
+  audience: { glance: ok, explore: good }
+  medium: { dashboard: good, report: good, slide: ok }
+
+guidance:
+  useWhen:
+    - Best sellers, top pages, biggest customers, where people look up names and exact numbers.
+    - More than 8 items, or long names.
+  avoidWhen:
+    - Fewer than 4 items. A bar chart says it faster.
+    - The ranking changes over time and that's the story. Use a line or slope chart.
+  alternatives:
+    - id: bar-horizontal
+      when: Exact values matter less than the shape of the ranking.
+    - id: data-table
+      when: Several columns per item, sorting and filtering.
+  pitfalls:
+    - Don't round values in a table; exactness is why people use it.
+    - Shares only make sense when the parts add up to a meaningful total.
+
+states:
+  empty:
+    treatment: message
+    description: The header stays; one row says there's nothing yet.
+    message: No data yet
+  singlePoint:
+    treatment: adapt
+    description: One row at 100%.
+  allZeros:
+    treatment: adapt
+    description: Values show 0, bars are empty, and share shows "—" instead of a meaningless 0%.
+  outlier:
+    treatment: adapt
+    description: Bars scale to the largest value; the small ones are tiny but every row keeps its exact value.
+  negative:
+    treatment: adapt
+    description: Negative values keep their sign, sort last, and get no bar and no share.
+  manySeries:
+    treatment: adapt
+    description: Beyond 10 rows, the rest are summed into "Other (n)" without a rank.
+  longLabels:
+    treatment: adapt
+    description: Names are truncated at 28 characters; the full name is in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Full values grouped the locale's way (৳35,19,33,000 in en-IN); tables are for exact numbers.
+  timeGaps:
+    treatment: not-applicable
+    description: A ranking has no time axis.
+  noPrevious:
+    treatment: not-applicable
+    description: A ranking doesn't compare periods.
+
+color:
+  job: single
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: all
+  notes:
+    - It is a real table, with a caption and column headers, so screen readers can navigate it.
+    - Numbers use tabular figures so digits line up.
+
+code:
+  vanilla: code/vanilla.ts
+  react: code/react.tsx
+  plotly: code/plotly_figure.py
+
+related: [bar-horizontal, data-table]

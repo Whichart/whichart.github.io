@@ -1,0 +1,320 @@
+{
+  "columns": [
+    "product",
+    "orders",
+    "revenue",
+    "change"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Products this month",
+      "locale": "en-US",
+      "currency": "USD",
+      "columns": [
+        {
+          "key": "product",
+          "label": "Product",
+          "format": "text"
+        },
+        {
+          "key": "orders",
+          "label": "Orders",
+          "format": "number"
+        },
+        {
+          "key": "revenue",
+          "label": "Revenue",
+          "format": "currency"
+        },
+        {
+          "key": "change",
+          "label": "vs last month",
+          "format": "change"
+        }
+      ],
+      "sortBy": "revenue"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Products this month (trail runner launch)",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Profit by product",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Profit",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "manySeries": {
+      "file": "states/manySeries.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Products this month",
+        "locale": "en-IN",
+        "currency": "BDT",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    },
+    "noPrevious": {
+      "file": "states/noPrevious.csv",
+      "options": {
+        "label": "Products in our first month",
+        "locale": "en-US",
+        "currency": "USD",
+        "columns": [
+          {
+            "key": "product",
+            "label": "Product",
+            "format": "text"
+          },
+          {
+            "key": "orders",
+            "label": "Orders",
+            "format": "number"
+          },
+          {
+            "key": "revenue",
+            "label": "Revenue",
+            "format": "currency"
+          },
+          {
+            "key": "change",
+            "label": "vs last month",
+            "format": "change"
+          }
+        ],
+        "sortBy": "revenue"
+      }
+    }
+  }
+}

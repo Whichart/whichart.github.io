@@ -49,6 +49,8 @@ def theme_colors(mode: str) -> dict:
         "muted": m["ink"]["muted"],
         "secondary": m["ink"]["secondary"],
         "primary": m["ink"]["primary"],
+        "surface": m["surface"],
+        "grid": m["grid"],
         # Meter tracks use a light step of the sequential ramp (dark mode: a dark step).
         "track": TOKENS["sequential"]["blue"][1] if mode == "light" else TOKENS["sequential"]["blue"][-2],
     }

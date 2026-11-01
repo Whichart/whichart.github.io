@@ -141,12 +141,26 @@
         0,
         0
       ]
+    },
+    "label": {
+      "color": "#0b0b0b",
+      "textBorderWidth": 0
+    }
+  },
+  "scatter": {
+    "label": {
+      "color": "#0b0b0b",
+      "textBorderWidth": 0
     }
   },
   "pie": {
     "itemStyle": {
       "borderColor": "#fcfcfb",
       "borderWidth": 2
+    },
+    "label": {
+      "color": "#0b0b0b",
+      "textBorderWidth": 0
     }
   },
   "funnel": {

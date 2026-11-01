@@ -1,0 +1,117 @@
+id: stacked-bar
+name: Stacked bar chart
+aliases: [stacked column chart, stacked bar graph, segmented bar chart, composition bar chart]
+status: ready
+summary: Shows a total for each group and how it splits into a few parts, such as monthly revenue by channel.
+
+goals: [part-of-whole, compare]
+
+data:
+  fields:
+    - role: category
+      count: { min: 1, max: 2 }
+      description: The group (month, region) and the part (channel, product line). Long format, one row per group and part.
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+  notes: Beyond 5 parts, the top 4 are kept and the rest summed into "Other".
+
+fit:
+  rules:
+    - when: { metric: categoryFields, op: "<", value: 2 }
+      effect: penalty
+      weight: 0.5
+      reason: Stacking needs a group and a part, e.g. month and channel. With one category, plain bars are clearer.
+      suggest: bar-horizontal
+    - when: { all: [{ metric: goal, op: "in", value: [part-of-whole, compare] }, { metric: categoryFields, op: ">=", value: 2 }] }
+      effect: boost
+      weight: 0.4
+      reason: Totals per group and their make-up, on one common baseline.
+    - when: { metric: sumsToWhole, op: "=", value: true }
+      effect: boost
+      weight: 0.15
+      reason: Your parts add up to meaningful totals.
+    - when: { metric: hasNegatives, op: "=", value: true }
+      effect: penalty
+      weight: 0.3
+      reason: Negative parts stack below zero, which is hard to read.
+      fix: Show each part as its own bars, or separate gains and losses.
+    - when: { metric: space, op: "=", value: tile }
+      effect: exclude
+      reason: Stacks and a legend don't fit in a KPI tile.
+
+context:
+  space: { tile: never, card: ok, half: good, full: good }
+  audience: { glance: good, explore: ok }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - The total matters and so does its make-up, e.g. revenue per month by channel.
+    - 2–5 parts that add up to something real.
+  avoidWhen:
+    - You need to compare the parts with each other across groups. Only the bottom part shares a baseline; use grouped bars or small multiples.
+    - More than 5 parts. Fold the rest into "Other".
+    - Parts don't add up (rates, averages).
+  alternatives:
+    - id: stacked-bar-100
+      when: Only the mix matters, not the totals.
+    - id: grouped-bar
+      when: Comparing the parts with each other matters more than the total.
+    - id: donut
+      when: One period only, five or fewer parts.
+  pitfalls:
+    - Only the bottom segment sits on a common baseline. Put the most important part at the bottom.
+    - Colours follow the part, never its rank, so the same channel keeps its colour in every month.
+
+states:
+  empty:
+    treatment: message
+    description: Keep the frame; show a short message.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One stack with its total labelled; a donut or a bar chart may suit one group better.
+  allZeros:
+    treatment: adapt
+    description: Empty stacks on a 0–1 axis, without total labels.
+  outlier:
+    treatment: adapt
+    description: Linear scale kept; totals are labelled so the shorter stacks stay readable.
+  negative:
+    treatment: adapt
+    description: Negative parts stack below zero and positive parts above; the label shows the net total.
+  manySeries:
+    treatment: adapt
+    description: Beyond 5 parts, the top 4 by size keep their colours and the rest are summed into "Other".
+  longLabels:
+    treatment: adapt
+    description: Legend names are truncated at 20 characters and group labels at 12; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Compact ticks and totals in the locale (৳77.2Cr).
+  timeGaps:
+    treatment: not-applicable
+    description: Groups are categories; missing groups simply aren't drawn.
+  noPrevious:
+    treatment: not-applicable
+    description: A stacked bar doesn't compare against a previous period.
+
+color:
+  job: categorical
+  pairs: adjacent
+  maxSeries: 5
+
+accessibility:
+  tableFallback: true
+  labels: selective
+  notes:
+    - Totals are labelled on every stack; the tooltip lists each part.
+    - Segments are separated by a 2px gap, so adjacent colours don't blur together.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [bar-horizontal, stacked-bar-100, donut, grouped-bar]

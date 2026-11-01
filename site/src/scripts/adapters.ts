@@ -90,6 +90,47 @@ export function adapt(chart: string, rows: Row[], enc: Encoding): Adapted | null
     };
   }
 
+  // One measure per category: bars, donut and ranked table.
+  if ((chart === 'bar-horizontal' || chart === 'donut' || chart === 'top-n-table') && enc.category) {
+    const cat = enc.category;
+    const label = `${pretty(measure)} by ${pretty(cat).toLowerCase()}`;
+    const out = rows.map((r) => ({ [chart === 'top-n-table' ? 'label' : 'category']: String(r[cat] ?? ''), value: parseNumber(r[measure]) }));
+    return { rows: out, options: { ...base, label, nameLabel: pretty(cat), valueLabel: pretty(measure) } };
+  }
+
+  if (chart === 'stacked-bar') {
+    // Needs a group and a part: with dates, the group is the month; otherwise the first two text columns.
+    const text = Object.keys(rows[0] ?? {}).filter((c) => c !== enc.time && !enc.measures.includes(c) && c !== enc.comparison && rows.some((r) => parseNumber(r[c]) === null));
+    const month = new Intl.DateTimeFormat(navigator.language || 'en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+    const out: { group: string; series: string; value: number | null }[] = [];
+    for (const r of rows) {
+      let group: string | null = null;
+      let series: string;
+      if (enc.time && text.length >= 1) {
+        const t = parseDate(r[enc.time]);
+        if (t === null) continue;
+        group = month.format(new Date(t));
+        series = String(r[text[0]] ?? '');
+      } else if (text.length >= 2) {
+        group = String(r[text[0]] ?? '');
+        series = String(r[text[1]] ?? '');
+      } else {
+        return null;
+      }
+      out.push({ group, series, value: parseNumber(r[measure]) });
+    }
+    return { rows: out, options: { ...base, label: `${pretty(measure)} by ${pretty(text[enc.time ? 0 : 1]).toLowerCase()}` } };
+  }
+
+  if (chart === 'data-table') {
+    // Numbers arrive as text from a CSV; parse the numeric columns and say how to show each one.
+    const keys = Object.keys(rows[0] ?? {});
+    const numeric = new Set([...enc.measures, ...(enc.comparison ? [enc.comparison] : [])]);
+    const columns = keys.map((key) => ({ key, label: pretty(key), format: numeric.has(key) ? (currencyOf(rows, key) ? 'currency' : 'number') : 'text' }));
+    const out = rows.map((r) => Object.fromEntries(keys.map((k) => [k, numeric.has(k) ? parseNumber(r[k]) : String(r[k] ?? '')])));
+    return { rows: out, options: { ...base, label: 'Your data', columns, sortBy: measure } };
+  }
+
   if (chart === 'kpi-tile-delta') {
     if (enc.comparison && rows.length <= 1) {
       const r = rows[0];

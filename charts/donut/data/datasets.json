@@ -1,0 +1,80 @@
+{
+  "columns": [
+    "category",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Revenue by channel, September",
+      "locale": "en-US",
+      "currency": "USD"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Revenue by channel, September",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Revenue by channel, September",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Refunds by channel",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Revenue by channel, September",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Profit by channel",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "manySeries": {
+      "file": "states/manySeries.csv",
+      "options": {
+        "label": "Revenue by channel, September",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Revenue by sales channel this month after refunds and fees",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Revenue by channel",
+        "locale": "en-IN",
+        "currency": "BDT"
+      }
+    }
+  }
+}

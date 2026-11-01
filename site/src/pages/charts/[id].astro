@@ -183,8 +183,9 @@ const playground = {
   .aka { margin: 0 0 12px; font-size: 14px; }
   .playground { margin-top: 24px; background: var(--wc-surface); border: 1px solid var(--wc-border); border-radius: 14px; padding: 16px; }
   .pg-tabs, .code-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .pg-stage { display: grid; place-items: center; }
-  .pg-chart { width: 100%; max-width: 760px; }
+  .pg-stage { display: grid; place-items: center; grid-template-columns: minmax(0, 1fr); }
+  /* min-width: 0 lets wide content (tables) scroll inside instead of widening the page. */
+  .pg-chart { width: 100%; max-width: 760px; min-width: 0; overflow-x: auto; }
   .pg-chart[data-kind='echarts'] { height: 360px; }
   .pg-chart[data-kind='vanilla'] { max-width: 360px; min-height: 170px; }
   .pg-chart :global(.preview img) { width: 100%; height: auto; }

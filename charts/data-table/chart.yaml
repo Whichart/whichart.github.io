@@ -1,0 +1,114 @@
+id: data-table
+name: Data table
+aliases: [table, data grid, report table, table with conditional formatting, sortable table]
+status: ready
+summary: Exact values in typed, sortable columns, with only the cells that need attention highlighted.
+
+goals: [compare, ranking]
+
+preview: { width: 480, height: 400 }
+
+data:
+  fields:
+    - role: category
+      count: { min: 0, max: 3 }
+    - role: measure
+      count: { min: 1, max: 12 }
+  rows: { min: 0 }
+  notes: Columns can be text, number, currency, percent or change (a fraction against the previous period).
+
+fit:
+  rules:
+    - when: { metric: audience, op: "=", value: explore }
+      effect: boost
+      weight: 0.4
+      reason: Analysts look things up; exact values beat any chart.
+    - when: { metric: measureFields, op: ">=", value: 3 }
+      effect: boost
+      weight: 0.3
+      reason: Several measures per item read best as columns.
+    - when: { metric: rows, op: ">", value: 20 }
+      effect: boost
+      weight: 0.15
+      reason: Many rows; a table with sorting handles them.
+    - when: { metric: audience, op: "=", value: glance }
+      effect: penalty
+      weight: 0.3
+      reason: A table has no shape to read at a glance.
+    - when: { metric: space, op: "=", value: tile }
+      effect: exclude
+      reason: A table doesn't fit in a KPI tile.
+
+context:
+  space: { tile: never, card: ok, half: good, full: good }
+  audience: { glance: poor, explore: good }
+  medium: { dashboard: ok, report: good, slide: poor }
+
+guidance:
+  useWhen:
+    - People need to look up exact values, or compare several measures per item.
+    - Below a chart, as its detail and accessible fallback.
+  avoidWhen:
+    - The message is a shape (a trend, a dominant part). Use a chart and offer the table beside it.
+    - On a slide; nobody reads a table across a room.
+  alternatives:
+    - id: top-n-table
+      when: One measure, ranked, with inline bars.
+    - id: bar-horizontal
+      when: The ranking matters more than exact values.
+  pitfalls:
+    - Colour only the cells that need attention, such as the change column; a rainbow table has no focus.
+    - Right-align numbers with tabular figures so digits line up.
+    - Never leave blanks; show "—" for missing values and "New" for no previous period.
+
+states:
+  empty:
+    treatment: message
+    description: Headers stay; one row says there's nothing yet.
+    message: No data yet
+  singlePoint:
+    treatment: adapt
+    description: One row, still sortable; nothing hides.
+  allZeros:
+    treatment: adapt
+    description: Zeros are shown as 0 (a real value) and change as "No change", never blank.
+  outlier:
+    treatment: render
+    description: Exact values need no scale; the outlier is just a number.
+  negative:
+    treatment: render
+    description: Negative values keep their sign; change cells colour by whether the move is good.
+  manySeries:
+    treatment: adapt
+    description: The first 10 rows show, with a "Show all N rows" button.
+  longLabels:
+    treatment: adapt
+    description: Text is truncated at 28 characters; the full text is in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Full values grouped the locale's way (৳35,19,33,000 in en-IN); tables are for exact numbers.
+  timeGaps:
+    treatment: not-applicable
+    description: A table has no time axis.
+  noPrevious:
+    treatment: adapt
+    description: Change cells show "New" instead of a percentage.
+
+color:
+  job: status
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: all
+  notes:
+    - A real table with a caption, column headers and aria-sort on the sorted column.
+    - Sort controls are buttons in the headers, reachable by keyboard.
+    - Change cells use arrows and signs as well as colour.
+
+code:
+  vanilla: code/vanilla.ts
+  react: code/react.tsx
+  plotly: code/plotly_figure.py
+
+related: [top-n-table, bar-horizontal]

@@ -93,7 +93,7 @@ states:
     description: The label wraps to two lines, then truncates; full label in the tooltip.
   largeNumbers:
     treatment: adapt
-    description: From 100,000 the value is compact in the locale (৳1.6Cr); full value in the tooltip.
+    description: From 100,000 the value is compact in the locale (৳51.3Cr); full value in the tooltip.
   timeGaps:
     treatment: adapt
     description: The total covers the days that have data; the sparkline breaks at missing days.
