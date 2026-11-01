@@ -39,18 +39,12 @@ export function toCsv(rows, columns = Object.keys(rows[0] ?? {})) {
   return [columns.join(','), ...rows.map((r) => columns.map((c) => cell(r[c])).join(','))].join('\n') + '\n';
 }
 
-/** Parse CSV written by toCsv. `date` and `label` stay strings; other columns become numbers (blank → null). */
+/** Parse CSV written by toCsv. A column is numeric when every non-blank value is a number (blank → null);
+ *  `date` always stays a string. */
 export function parseCsv(text) {
   const [head, ...lines] = text.trim().split('\n');
   const cols = head.split(',');
-  return lines.map((line) => {
-    const cells = line.split(',');
-    return Object.fromEntries(
-      cols.map((c, i) => {
-        const v = cells[i] ?? '';
-        if (c === 'date' || c === 'label') return [c, v];
-        return [c, v === '' ? null : Number(v)];
-      }),
-    );
-  });
+  const cells = lines.map((line) => line.split(','));
+  const numeric = cols.map((c, i) => c !== 'date' && cells.every((r) => (r[i] ?? '') === '' || Number.isFinite(Number(r[i]))));
+  return cells.map((r) => Object.fromEntries(cols.map((c, i) => [c, numeric[i] ? (r[i] === '' || r[i] === undefined ? null : Number(r[i])) : (r[i] ?? '')])));
 }

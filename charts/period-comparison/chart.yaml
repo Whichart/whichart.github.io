@@ -1,0 +1,113 @@
+id: period-comparison
+name: Current vs previous period
+aliases: [period over period chart, month over month chart, week over week comparison, year over year line chart, comparison line chart]
+status: ready
+summary: This period's line drawn over the previous period's, aligned day by day, so you see where it pulled ahead or fell behind.
+
+goals: [trend, compare]
+
+data:
+  fields:
+    - role: time
+      count: { min: 1, max: 1 }
+      description: Daily dates covering two periods (56 days for the default 28-day period).
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+  notes: The default period is 28 days, so weekdays line up (Monday against Monday).
+
+fit:
+  rules:
+    - when: { metric: timeFields, op: "=", value: 0 }
+      effect: exclude
+      reason: Comparing periods needs dates.
+      suggest: bar-horizontal
+    - when: { metric: series, op: ">", value: 1 }
+      effect: exclude
+      reason: Two lines per series would be unreadable. Compare one measure at a time.
+      suggest: multi-line
+    - when: { metric: pointsPerSeries, op: "<", value: 14 }
+      effect: penalty
+      weight: 0.5
+      reason: Under two weeks of data there's barely a previous period to compare.
+      fix: Collect more history, or show the change as a KPI tile.
+      suggest: kpi-tile-delta
+    - when: { all: [{ metric: goal, op: "in", value: [compare, trend] }, { metric: timeFields, op: "=", value: 1 }, { metric: pointsPerSeries, op: ">=", value: 28 }] }
+      effect: boost
+      weight: 0.35
+      reason: Enough history to put this period next to the last one, day by day.
+    - when: { metric: space, op: "=", value: tile }
+      effect: exclude
+      reason: Two lines and a legend don't fit in a KPI tile.
+
+context:
+  space: { tile: never, card: good, half: good, full: good }
+  audience: { glance: good, explore: good }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - The question is "are we doing better than last month?" and the path matters, not just the total.
+    - Spotting where a period pulled ahead or fell behind, such as a slow week.
+  avoidWhen:
+    - Only the total change matters. A KPI tile with change is faster to read.
+    - Calendar months of different lengths. Weekdays won't line up; use 28-day periods.
+  alternatives:
+    - id: kpi-tile-delta
+      when: Only the total and its change matter.
+    - id: line
+      when: There's no previous period, or the full history matters more.
+  pitfalls:
+    - Comparing a 31-day month with a 30-day one misaligns weekdays and invents differences.
+    - Don't colour the previous period as a second series; it's context, so it's grey and dashed.
+
+states:
+  empty:
+    treatment: message
+    description: Keep the frame; show a short message in the plot area.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One labelled dot; the previous period is shown only if that day's match exists.
+  allZeros:
+    treatment: adapt
+    description: Both lines flat on a 0–1 axis.
+  outlier:
+    treatment: adapt
+    description: Linear scale kept; the spike shows in the period it happened.
+  negative:
+    treatment: render
+    description: The axis extends below zero for both periods.
+  manySeries:
+    treatment: not-applicable
+    description: Compares one measure at a time.
+  longLabels:
+    treatment: adapt
+    description: Title truncated at 40 characters with an ellipsis; full name in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Locale-aware compact ticks; full values in the tooltip.
+  timeGaps:
+    treatment: adapt
+    description: Each line breaks at its own missing days, so a closure in either period is visible.
+  noPrevious:
+    treatment: adapt
+    description: Only the current period is drawn, with a note saying there's no previous period yet, rather than an empty comparison.
+
+color:
+  job: emphasis
+  maxSeries: 2
+
+accessibility:
+  tableFallback: true
+  labels: legend-only
+  notes:
+    - The previous period differs by colour and by dash pattern, so it's distinguishable without colour.
+    - 'The tooltip shows both dates and values, e.g. "Sep 3: $2,100" and "Aug 6: $1,900".'
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [kpi-tile-delta, line, multi-line]

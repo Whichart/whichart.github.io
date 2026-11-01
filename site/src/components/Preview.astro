@@ -12,7 +12,8 @@ const { chart, state = 'sample', alt, eager = false } = Astro.props;
 const src = (mode: string) => url(`previews/${chart}/${state}-${mode}.png`);
 const loading = eager ? 'eager' : 'lazy';
 // Sizes match the render harness: charts 480×300, components 300×170, at 2×.
-const [w, h] = chartById(chart)?.reference === 'vanilla' ? [600, 340] : [960, 600];
+const c = chartById(chart);
+const [w, h] = c?.doc.preview ? [c.doc.preview.width * 2, c.doc.preview.height * 2] : c?.reference === 'vanilla' ? [600, 340] : [960, 600];
 ---
 
 <span class="preview" data-chart={chart}>

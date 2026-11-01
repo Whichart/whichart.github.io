@@ -19,18 +19,36 @@ def snake(key: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower()
 
 
+def _is_number(v: str) -> bool:
+    try:
+        float(v)
+        return True
+    except ValueError:
+        return False
+
+
 def read_rows(path: Path) -> list[dict]:
-    rows = []
+    """Same rule as scripts/lib/data.mjs: numeric when every non-blank value is a number; date stays a string."""
     with path.open(newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            rows.append({k: (v if k in ("date", "label") else (None if v == "" else float(v))) for k, v in r.items()})
-    return rows
+        raw = list(csv.DictReader(f))
+    cols = raw[0].keys() if raw else []
+    numeric = {c for c in cols if c != "date" and all(r[c] == "" or _is_number(r[c]) for r in raw)}
+    return [{k: ((None if v == "" else float(v)) if k in numeric else v) for k, v in r.items()} for r in raw]
 
 
-def delta_colors(mode: str) -> dict:
-    d = TOKENS["modes"][mode]["delta"]
+def theme_colors(mode: str) -> dict:
+    """Colours a figure may need beyond the template: change colours, the series order, muted ink."""
+    m = TOKENS["modes"][mode]
+    d = m["delta"]
     red_up = TOKENS["deltaConvention"] == "red-up"
-    return {"good": d["bad"] if red_up else d["good"], "bad": d["good"] if red_up else d["bad"], "neutral": d["neutral"]}
+    return {
+        "good": d["bad"] if red_up else d["good"],
+        "bad": d["good"] if red_up else d["bad"],
+        "neutral": d["neutral"],
+        "series": m["categorical"],
+        "muted": m["ink"]["muted"],
+        "secondary": m["ink"]["secondary"],
+    }
 
 
 def load(chart_dir: Path):
@@ -53,7 +71,7 @@ def main(dirs: list[str]) -> None:
             out[chart_dir.name][key] = {}
             for mode in ("light", "dark"):
                 options = {snake(k): v for k, v in ds["options"].items()}
-                options["colors"] = delta_colors(mode)
+                options["colors"] = theme_colors(mode)
                 try:
                     fig = figure(rows, options)
                     fig.update_layout(template=TEMPLATES[mode])

@@ -118,6 +118,7 @@ export function echarts(tokens, mode) {
       smooth: false,
       // Value labels wear text ink, never an outline or the series colour.
       label: { color: m.ink.primary, textBorderWidth: 0 },
+      endLabel: { color: m.ink.primary, textBorderWidth: 0 },
     },
     markPoint: { label: { color: m.ink.primary, textBorderWidth: 0 } },
     bar: { itemStyle: { borderRadius: [tokens.marks.barRadius, tokens.marks.barRadius, 0, 0] } },
@@ -179,6 +180,15 @@ export const theme = ${JSON.stringify(theme, null, 2)};
 `;
 }
 
+/** Named colours for code that can't read CSS variables (ECharts options): pass as options.palette. */
+export function palette(tokens) {
+  const pick = (mode) => {
+    const m = tokens.modes[mode];
+    return { series: m.categorical, primary: m.ink.primary, secondary: m.ink.secondary, muted: m.ink.muted, grid: m.grid, axis: m.axis, surface: m.surface };
+  };
+  return { light: pick('light'), dark: pick('dark') };
+}
+
 /** All generated files, keyed by path relative to generated/. */
 export function buildAll(tokens) {
   const json = (o) => JSON.stringify(o, null, 2) + '\n';
@@ -189,5 +199,6 @@ export function buildAll(tokens) {
     'plotly-light.json': json(plotly(tokens, 'light')),
     'plotly-dark.json': json(plotly(tokens, 'dark')),
     'recharts-theme.js': recharts(tokens),
+    'palette.json': json(palette(tokens)),
   };
 }

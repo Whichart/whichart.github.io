@@ -2,6 +2,146 @@
   "version": 1,
   "charts": [
     {
+      "id": "area",
+      "name": "Area chart",
+      "summary": "Shows how one measure changes over time, with the filled area emphasising volume.",
+      "goals": [
+        "trend"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "time",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "The filled area implies continuity over time. Without a time field it means nothing.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": ">",
+            "value": 1
+          },
+          "effect": "exclude",
+          "reason": "Overlapping filled areas hide each other. Several series need lines or a stacked area.",
+          "suggest": "multi-line"
+        },
+        {
+          "when": {
+            "metric": "hasNegatives",
+            "op": "=",
+            "value": true
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "An area reads as volume from zero; negative values fill downwards and confuse that reading.",
+          "fix": "Use a line chart, which handles negative values cleanly.",
+          "suggest": "line"
+        },
+        {
+          "when": {
+            "metric": "pointsPerSeries",
+            "op": "<",
+            "value": 3
+          },
+          "effect": "penalty",
+          "weight": 0.6,
+          "reason": "With fewer than 3 points there's no trend to see.",
+          "suggest": "kpi-tile-delta"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "=",
+                "value": "trend"
+              },
+              {
+                "metric": "timeFields",
+                "op": "=",
+                "value": 1
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.3,
+          "reason": "One measure over time, where the volume matters, is what an area chart shows."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "Axes and labels don't fit in a KPI tile.",
+          "suggest": "sparkline"
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "poor",
+          "card": "good",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "ok"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "line",
+          "when": "Direction matters more than volume, or values go negative."
+        },
+        {
+          "id": "stacked-area",
+          "when": "A total made of a few parts over time."
+        },
+        {
+          "id": "sparkline",
+          "when": "It sits inside a KPI tile."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
       "id": "kpi-tile-delta",
       "name": "KPI tile with change",
       "summary": "One headline number and how it changed since the previous period.",
@@ -248,6 +388,409 @@
         {
           "id": "multi-line",
           "when": "You need 2–5 series on the same scale."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "multi-line",
+      "name": "Multi-line chart",
+      "summary": "Compares how 2–5 measures or segments change over time, on one shared axis.",
+      "goals": [
+        "trend",
+        "compare"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "time",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 8
+            }
+          },
+          {
+            "role": "category",
+            "count": {
+              "min": 0,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "Lines imply continuity over time. Without a time field the connecting lines mean nothing.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": "<",
+            "value": 2
+          },
+          "effect": "exclude",
+          "reason": "There's only one series; the single-series line chart is simpler.",
+          "suggest": "line"
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": ">",
+            "value": 5
+          },
+          "effect": "penalty",
+          "weight": 0.3,
+          "reason": "More than 5 lines become a tangle; the smallest are folded into \"Other\".",
+          "fix": "Show only the series that matter, or split into small multiples."
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "in",
+                "value": [
+                  "trend",
+                  "compare"
+                ]
+              },
+              {
+                "metric": "series",
+                "op": ">=",
+                "value": 2
+              },
+              {
+                "metric": "timeFields",
+                "op": "=",
+                "value": 1
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.4,
+          "reason": "Several series over time, compared on one axis, is what a multi-line chart is for."
+        },
+        {
+          "when": {
+            "metric": "pointsPerSeries",
+            "op": "<",
+            "value": 3
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "With fewer than 3 points per series there's no trend to compare.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "exclude",
+          "reason": "Several lines and a legend don't fit in a KPI tile."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "never",
+          "card": "ok",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "ok",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "line",
+          "when": "Only one series matters."
+        },
+        {
+          "id": "small-multiples",
+          "when": "Many series, each worth seeing on its own."
+        },
+        {
+          "id": "stacked-bar",
+          "when": "The parts add up to a meaningful total."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "period-comparison",
+      "name": "Current vs previous period",
+      "summary": "This period's line drawn over the previous period's, aligned day by day, so you see where it pulled ahead or fell behind.",
+      "goals": [
+        "trend",
+        "compare"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "time",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "Comparing periods needs dates.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": ">",
+            "value": 1
+          },
+          "effect": "exclude",
+          "reason": "Two lines per series would be unreadable. Compare one measure at a time.",
+          "suggest": "multi-line"
+        },
+        {
+          "when": {
+            "metric": "pointsPerSeries",
+            "op": "<",
+            "value": 14
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "Under two weeks of data there's barely a previous period to compare.",
+          "fix": "Collect more history, or show the change as a KPI tile.",
+          "suggest": "kpi-tile-delta"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "in",
+                "value": [
+                  "compare",
+                  "trend"
+                ]
+              },
+              {
+                "metric": "timeFields",
+                "op": "=",
+                "value": 1
+              },
+              {
+                "metric": "pointsPerSeries",
+                "op": ">=",
+                "value": 28
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.35,
+          "reason": "Enough history to put this period next to the last one, day by day."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "exclude",
+          "reason": "Two lines and a legend don't fit in a KPI tile."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "never",
+          "card": "good",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "kpi-tile-delta",
+          "when": "Only the total and its change matter."
+        },
+        {
+          "id": "line",
+          "when": "There's no previous period, or the full history matters more."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "sparkline",
+      "name": "Sparkline",
+      "summary": "A small, axis-free line that shows the shape of a measure over time, usually inside a KPI tile or table cell.",
+      "goals": [
+        "trend",
+        "kpi"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "time",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "A sparkline is a tiny time series. Without a time field there's no shape to show."
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": ">",
+            "value": 1
+          },
+          "effect": "exclude",
+          "reason": "One sparkline shows one series. Several series need one sparkline each, or a multi-line chart.",
+          "suggest": "multi-line"
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "boost",
+          "weight": 0.5,
+          "reason": "Built for small spaces such as KPI tiles and table cells."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "in",
+            "value": [
+              "half",
+              "full"
+            ]
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "With room to spare, a sparkline hides the axes and values people would want.",
+          "suggest": "line"
+        },
+        {
+          "when": {
+            "metric": "audience",
+            "op": "=",
+            "value": "explore"
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "No axes means no exact reading; analysts need a full chart.",
+          "suggest": "line"
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "good",
+          "card": "ok",
+          "half": "poor",
+          "full": "poor"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "poor"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "ok",
+          "slide": "poor"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "kpi-tile-sparkline",
+          "when": "You want the number, the change and the shape together."
+        },
+        {
+          "id": "line",
+          "when": "There's room for axes and labels."
         }
       ],
       "code": [

@@ -87,9 +87,11 @@ test('recommend: a daily series ranks the line chart first', () => {
   assert.ok(r.ranked[0].reasons.length >= 2);
 });
 
-test('recommend: in a tile, the KPI tile beats the line chart', () => {
+test('recommend: in a tile, tile-sized charts beat the line chart', () => {
   const r = recommend({ csv: lineSample, context: { space: 'tile' } });
-  assert.equal(r.ranked[0].id, 'kpi-tile-delta');
+  assert.ok(['sparkline', 'kpi-tile-delta'].includes(r.ranked[0].id), r.ranked[0].id);
+  const rank = (id: string) => r.ranked.findIndex((x) => x.id === id);
+  assert.ok(rank('kpi-tile-delta') < rank('line'));
   const line = r.ranked.find((x) => x.id === 'line')!;
   assert.ok(line.warnings.some((w) => w.text.includes("don't fit in a KPI tile")));
 });
@@ -148,5 +150,5 @@ test('review: verdicts', () => {
   assert.equal(review('donut', { csv: lineSample }).verdict, 'unknown');
   const tile = review('line', { csv: lineSample, context: { space: 'tile' } });
   assert.ok(['ok', 'poor'].includes(tile.verdict));
-  assert.equal(tile.better[0].id, 'kpi-tile-delta');
+  assert.ok(['sparkline', 'kpi-tile-delta'].includes(tile.better[0].id), tile.better[0].id);
 });

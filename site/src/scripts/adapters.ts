@@ -44,8 +44,33 @@ export function adapt(chart: string, rows: Row[], enc: Encoding): Adapted | null
   if (!measure) return null;
   const base = { label: pretty(measure), locale: navigator.language || 'en-US', currency: currencyOf(rows, measure) };
 
-  if (chart === 'line' && enc.time) {
+  // One measure over time, by day.
+  if ((chart === 'line' || chart === 'area' || chart === 'period-comparison') && enc.time) {
     return { rows: daily(rows, enc.time, measure), options: base };
+  }
+
+  if (chart === 'sparkline' && enc.time) {
+    const series = daily(rows, enc.time, measure);
+    return { rows: series.slice(-30), options: base, note: series.length > 30 ? 'The last 30 days.' : undefined };
+  }
+
+  if (chart === 'multi-line' && enc.time) {
+    const time = enc.time;
+    const out: { date: string; series: string; value: number | null }[] = [];
+    for (const r of rows) {
+      const t = parseDate(r[time]);
+      if (t === null) continue;
+      const date = iso(t);
+      if (enc.category) {
+        // Long format: one row per series per day.
+        out.push({ date, series: String(r[enc.category] ?? ''), value: parseNumber(r[measure]) });
+      } else {
+        // Wide format: each numeric column is a series.
+        for (const m of enc.measures) out.push({ date, series: pretty(m), value: parseNumber(r[m]) });
+      }
+    }
+    const label = enc.category ? `${pretty(measure)} by ${pretty(enc.category).toLowerCase()}` : 'Comparison over time';
+    return { rows: out, options: { ...base, label } };
   }
 
   if (chart === 'kpi-tile-delta') {

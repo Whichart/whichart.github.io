@@ -387,6 +387,27 @@
         "type": "string",
         "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
       }
+    },
+    "preview": {
+      "description": "Render size for previews and the playground, when the default (480×300 for charts, 300×170 for components) is wrong, e.g. a sparkline.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 80,
+          "maximum": 960
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 40,
+          "maximum": 640
+        }
+      }
     }
   },
   "$defs": {

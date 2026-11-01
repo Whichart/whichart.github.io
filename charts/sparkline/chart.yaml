@@ -1,0 +1,113 @@
+id: sparkline
+name: Sparkline
+aliases: [spark line, mini chart, trend line, word-sized graphic, micro chart]
+status: ready
+summary: A small, axis-free line that shows the shape of a measure over time, usually inside a KPI tile or table cell.
+
+goals: [trend, kpi]
+
+preview: { width: 320, height: 80 }
+
+data:
+  fields:
+    - role: time
+      count: { min: 1, max: 1 }
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+
+fit:
+  rules:
+    - when: { metric: timeFields, op: "=", value: 0 }
+      effect: exclude
+      reason: A sparkline is a tiny time series. Without a time field there's no shape to show.
+    - when: { metric: series, op: ">", value: 1 }
+      effect: exclude
+      reason: One sparkline shows one series. Several series need one sparkline each, or a multi-line chart.
+      suggest: multi-line
+    - when: { metric: space, op: "=", value: tile }
+      effect: boost
+      weight: 0.5
+      reason: Built for small spaces such as KPI tiles and table cells.
+    - when: { metric: space, op: "in", value: [half, full] }
+      effect: penalty
+      weight: 0.4
+      reason: With room to spare, a sparkline hides the axes and values people would want.
+      suggest: line
+    - when: { metric: audience, op: "=", value: explore }
+      effect: penalty
+      weight: 0.4
+      reason: No axes means no exact reading; analysts need a full chart.
+      suggest: line
+
+context:
+  space: { tile: good, card: ok, half: poor, full: poor }
+  audience: { glance: good, explore: poor }
+  medium: { dashboard: good, report: ok, slide: poor }
+
+guidance:
+  useWhen:
+    - Next to a headline number, to show whether it's rising, falling or flat.
+    - In table rows, to compare the shape of many series compactly.
+  avoidWhen:
+    - Readers need exact values or dates. Use a line chart.
+    - There's room for a full chart.
+  alternatives:
+    - id: kpi-tile-sparkline
+      when: You want the number, the change and the shape together.
+    - id: line
+      when: There's room for axes and labels.
+  pitfalls:
+    - Sparklines don't start at zero; that's by design, but never compare the heights of two sparklines with different scales.
+    - Without a label or a nearby number, a sparkline is decoration.
+
+states:
+  empty:
+    treatment: message
+    description: A short message in the same small space, so the tile doesn't collapse.
+    message: No data yet
+  singlePoint:
+    treatment: adapt
+    description: A single dot; there's no shape yet.
+  allZeros:
+    treatment: adapt
+    description: A flat line along the bottom, not the middle, so it doesn't look like a steady non-zero value.
+  outlier:
+    treatment: adapt
+    description: Linear scale kept; the spike dominates, which is the truth. The latest value is still marked.
+  negative:
+    treatment: adapt
+    description: A dashed zero line appears when values cross zero, so above and below are readable.
+  manySeries:
+    treatment: not-applicable
+    description: One sparkline shows one series.
+  longLabels:
+    treatment: not-applicable
+    description: A sparkline shows no text; its label belongs to the surrounding tile.
+  largeNumbers:
+    treatment: not-applicable
+    description: No numbers are shown; the tooltip and screen-reader text use full values.
+  timeGaps:
+    treatment: adapt
+    description: The line breaks at missing days.
+  noPrevious:
+    treatment: not-applicable
+    description: A sparkline doesn't compare periods.
+
+color:
+  job: single
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: none
+  notes:
+    - Screen readers get a sentence, e.g. "Revenue over 30 days, from $1,722 to $2,480, up 44%".
+    - Always place a sparkline next to a label or number that names it.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [kpi-tile-sparkline, line, area]

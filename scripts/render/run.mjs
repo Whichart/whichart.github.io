@@ -99,6 +99,7 @@ import { flushSync } from 'react-dom';
 import Plotly from 'plotly.js-dist-min';
 import light from ${tokens('echarts-light.json')};
 import dark from ${tokens('echarts-dark.json')};
+import palette from ${tokens('palette.json')};
 ${imports.join('\n')}
 echarts.registerTheme('whichart-light', light);
 echarts.registerTheme('whichart-dark', dark);
@@ -113,7 +114,8 @@ const targets = { ${registry.join(',\n')} };
     const fn = (targets as any)[id][target];
     if (target === 'echarts') {
       // Animation off so screenshots show the finished chart.
-      echarts.init(el, 'whichart-' + mode, { renderer: 'svg' }).setOption({ ...fn(rows, options), animation: false });
+      // ECharts can't read CSS variables, so named colours (e.g. muted) are passed as options.palette.
+      echarts.init(el, 'whichart-' + mode, { renderer: 'svg' }).setOption({ ...fn(rows, { ...options, palette: (palette as any)[mode] }), animation: false });
     } else if (target === 'recharts' || target === 'react') {
       const root = createRoot(el);
       flushSync(() => root.render(createElement(fn, { rows, ...options })));
@@ -193,7 +195,7 @@ for (const c of charts) {
         }
         document.body.append(title, table);
       },
-      { id: c.id, mode, targets: c.targets, datasets: c.datasets, states: c.doc.states, size: SIZE[c.kind], previewMode: !!previews },
+      { id: c.id, mode, targets: c.targets, datasets: c.datasets, states: c.doc.states, size: c.doc.preview ?? SIZE[c.kind], previewMode: !!previews },
     );
 
     for (const d of c.datasets) {

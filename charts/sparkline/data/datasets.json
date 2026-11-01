@@ -1,0 +1,64 @@
+{
+  "columns": [
+    "date",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Revenue",
+      "locale": "en-US",
+      "currency": "USD"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Net profit",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "timeGaps": {
+      "file": "states/timeGaps.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    }
+  }
+}

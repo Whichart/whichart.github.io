@@ -1,0 +1,124 @@
+id: area
+name: Area chart
+aliases: [area graph, filled line chart, mountain chart, area plot]
+status: ready
+summary: Shows how one measure changes over time, with the filled area emphasising volume.
+
+goals: [trend]
+
+data:
+  fields:
+    - role: time
+      count: { min: 1, max: 1 }
+    - role: measure
+      count: { min: 1, max: 1 }
+      description: A count or amount where "how much" matters, such as orders or sign-ups.
+  rows: { min: 1 }
+  notes: Missing periods are filled with gaps, never interpolated.
+
+fit:
+  rules:
+    - when: { metric: timeFields, op: "=", value: 0 }
+      effect: exclude
+      reason: The filled area implies continuity over time. Without a time field it means nothing.
+      suggest: bar-horizontal
+    - when: { metric: series, op: ">", value: 1 }
+      effect: exclude
+      reason: Overlapping filled areas hide each other. Several series need lines or a stacked area.
+      suggest: multi-line
+    - when: { metric: hasNegatives, op: "=", value: true }
+      effect: penalty
+      weight: 0.4
+      reason: An area reads as volume from zero; negative values fill downwards and confuse that reading.
+      fix: Use a line chart, which handles negative values cleanly.
+      suggest: line
+    - when: { metric: pointsPerSeries, op: "<", value: 3 }
+      effect: penalty
+      weight: 0.6
+      reason: With fewer than 3 points there's no trend to see.
+      suggest: kpi-tile-delta
+    - when: { all: [{ metric: goal, op: "=", value: trend }, { metric: timeFields, op: "=", value: 1 }] }
+      effect: boost
+      weight: 0.3
+      reason: One measure over time, where the volume matters, is what an area chart shows.
+    - when: { metric: space, op: "=", value: tile }
+      effect: penalty
+      weight: 0.5
+      reason: Axes and labels don't fit in a KPI tile.
+      suggest: sparkline
+
+context:
+  space: { tile: poor, card: good, half: good, full: good }
+  audience: { glance: good, explore: ok }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - One measure over time where the amount matters as much as the direction, such as orders, sign-ups or sessions.
+    - A single series that should feel substantial on a dashboard.
+  avoidWhen:
+    - Values go negative. Use a line chart.
+    - Several series. Overlapping fills hide each other; use a multi-line or stacked area chart.
+    - The axis can't start at zero. A filled area always implies zero is the base.
+  alternatives:
+    - id: line
+      when: Direction matters more than volume, or values go negative.
+    - id: stacked-area
+      when: A total made of a few parts over time.
+    - id: sparkline
+      when: It sits inside a KPI tile.
+  pitfalls:
+    - Never start the y-axis above zero. The fill would lie about the volume.
+    - Keep the fill light so gridlines and the line stay readable.
+
+states:
+  empty:
+    treatment: message
+    description: Keep the frame and axes so the layout doesn't jump; show a short message in the plot area.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: A single dot with its value labelled; there's no area to fill.
+  allZeros:
+    treatment: adapt
+    description: A flat line on the baseline with the y-axis fixed to 0–1, so it doesn't invent a scale.
+  outlier:
+    treatment: adapt
+    description: Keep the linear scale and label the highest point. The spike is real; don't clip it.
+  negative:
+    treatment: adapt
+    description: The fill runs to zero from both sides so the sign is visible, but a line chart is the better choice.
+  manySeries:
+    treatment: not-applicable
+    description: Single series by definition.
+  longLabels:
+    treatment: adapt
+    description: The title is truncated to 40 characters with an ellipsis; the full name is in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Locale-aware compact ticks (1.2M, ৳1.3Cr); the tooltip shows the full value.
+  timeGaps:
+    treatment: adapt
+    description: Missing days break both the line and the fill instead of bridging the gap.
+  noPrevious:
+    treatment: not-applicable
+    description: An area chart doesn't compare against a previous period.
+
+color:
+  job: single
+  pairs: adjacent
+  maxSeries: 1
+
+accessibility:
+  tableFallback: true
+  labels: selective
+  notes:
+    - The fill is decorative; the line carries the data, at full contrast.
+    - Offer the values as a table.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [line, stacked-area, sparkline]

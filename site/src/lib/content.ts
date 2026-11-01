@@ -85,13 +85,13 @@ export interface Pattern {
   ready: boolean;
 }
 
+/** Same rule as scripts/lib/data.mjs: numeric when every non-blank value is a number; `date` stays a string. */
 function parseCsv(text: string): Dataset['rows'] {
   const [head, ...lines] = text.trim().split('\n');
   const cols = head.split(',');
-  return lines.map((line) => {
-    const cells = line.split(',');
-    return Object.fromEntries(cols.map((c, i) => [c, c === 'date' || c === 'label' ? cells[i] : cells[i] === '' ? null : Number(cells[i])]));
-  });
+  const cells = lines.map((line) => line.split(','));
+  const numeric = cols.map((c, i) => c !== 'date' && cells.every((r) => (r[i] ?? '') === '' || Number.isFinite(Number(r[i]))));
+  return cells.map((r) => Object.fromEntries(cols.map((c, i) => [c, numeric[i] ? (r[i] === '' || r[i] === undefined ? null : Number(r[i])) : (r[i] ?? '')])));
 }
 
 let chartCache: Chart[] | undefined;
