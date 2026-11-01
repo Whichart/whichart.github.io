@@ -1,0 +1,79 @@
+{
+  "columns": [
+    "cohort",
+    "period",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Customers who ordered again",
+      "locale": "en-US"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-US"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-US"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Customers who ordered again (no repeat orders yet)",
+        "locale": "en-US"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Customers who ordered again (June: tiny cohort)",
+        "locale": "en-US"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-US"
+      }
+    },
+    "manySeries": {
+      "file": "states/manySeries.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-US"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Customers who placed another order in later months, by first-order month",
+        "locale": "en-US"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-IN"
+      }
+    },
+    "timeGaps": {
+      "file": "states/timeGaps.csv",
+      "options": {
+        "label": "Customers who ordered again",
+        "locale": "en-US"
+      }
+    }
+  }
+}

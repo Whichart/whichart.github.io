@@ -49,13 +49,17 @@ const jsonLd = {
     <section class="section" id="patterns" aria-labelledby="patterns-title">
       <div class="section-head">
         <h2 id="patterns-title">Patterns</h2>
-        <p class="muted">Questions builders ask, answered with the right chart. {ready} of {ps.length} ready.</p>
+        <p class="muted">Questions builders ask, answered with the right chart.{ready < ps.length ? ` ${ready} of ${ps.length} ready.` : ''}</p>
       </div>
       <div class="grid">{ps.filter((p) => p.ready).map((p) => <PatternCard pattern={p} />)}</div>
-      <div class="next">
-        <span class="muted">Coming next:</span>
-        <ul class="chips">{ps.filter((p) => !p.ready).map((p) => <li><span class="chip soon-chip" title={p.summary}>{p.question}</span></li>)}</ul>
-      </div>
+      {
+        ps.some((p) => !p.ready) && (
+          <div class="next">
+            <span class="muted">Coming next:</span>
+            <ul class="chips">{ps.filter((p) => !p.ready).map((p) => <li><span class="chip soon-chip" title={p.summary}>{p.question}</span></li>)}</ul>
+          </div>
+        )
+      }
     </section>
 
     <section class="section" id="charts" aria-labelledby="charts-title">

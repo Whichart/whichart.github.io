@@ -1,0 +1,119 @@
+id: cohort-heatmap
+name: Cohort retention heatmap
+aliases: [retention chart, cohort analysis, retention matrix, cohort table, retention heatmap]
+status: ready
+summary: For each group of customers who started in the same month, the share who came back in each later month.
+
+goals: [trend, distribution]
+
+data:
+  fields:
+    - role: ordinal
+      count: { min: 1, max: 1 }
+      description: The period number, e.g. months_since_first_order (0, 1, 2…).
+    - role: measure
+      count: { min: 1, max: 1 }
+      description: The count of people active in that period. Period 0 is the cohort's size.
+  # The cohort itself (e.g. first-order month) may be a date or a label; the rules check for either.
+  rows: { min: 1 }
+  notes: Give counts, not percentages, so the chart knows each cohort's size and can flag small ones. Name the period column period, months_since_… or week_number so it's recognised.
+
+fit:
+  rules:
+    - when: { all: [{ metric: categoryFields, op: "=", value: 0 }, { metric: timeFields, op: "=", value: 0 }] }
+      effect: exclude
+      reason: A cohort chart needs a cohort column, e.g. first-order month.
+    - when: { metric: periodIndex, op: "=", value: false }
+      effect: exclude
+      reason: It needs a numbered period column, e.g. months_since_first_order (0, 1, 2…).
+    - when: { metric: periodIndex, op: "=", value: true }
+      effect: boost
+      weight: 0.6
+      reason: Cohorts with numbered periods since they started are exactly what a retention grid shows.
+    - when: { metric: goal, op: "=", value: trend }
+      effect: boost
+      weight: 0.15
+      reason: Shows how loyalty changes from one cohort to the next.
+    - when: { metric: categories, op: ">", value: 12 }
+      effect: penalty
+      weight: 0.1
+      reason: Only the latest 12 cohorts are shown.
+    - when: { metric: space, op: "in", value: [tile, card] }
+      effect: penalty
+      weight: 0.4
+      reason: A cohort grid needs room for every cell's label.
+
+context:
+  space: { tile: never, card: poor, half: ok, full: good }
+  audience: { glance: ok, explore: good }
+  medium: { dashboard: good, report: good, slide: ok }
+
+guidance:
+  useWhen:
+    - '"Are customers coming back?", especially whether newer customers stick better than older ones.'
+    - Subscription, repeat-purchase and app-usage retention.
+  avoidWhen:
+    - Fewer than 3 cohorts or periods; a line or a single number says it better.
+    - Showing one overall retention rate. Use a KPI tile.
+  alternatives:
+    - id: multi-line
+      when: Only a few cohorts matter; one retention curve each.
+    - id: kpi-tile-delta
+      when: One headline retention number is enough.
+  pitfalls:
+    - Months that haven't happened yet are blank, not 0%. A 0% would mean everyone left.
+    - Small cohorts swing wildly; mark them or hide them.
+    - Percentages without cohort sizes hide whether a cohort is 12 people or 12,000.
+
+states:
+  empty:
+    treatment: message
+    description: A short message instead of an empty grid.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One cohort with only its starting month at 100%.
+  allZeros:
+    treatment: adapt
+    description: Later months show 0% in the lightest shade; the starting month stays 100%.
+  outlier:
+    treatment: adapt
+    description: A tiny cohort is faded and labelled n=12, because its percentages are noise.
+  negative:
+    treatment: message
+    description: Counts of people can't be negative, so it says so.
+    message: Cohort counts can’t be negative
+  manySeries:
+    treatment: adapt
+    description: Only the latest 12 cohorts are shown.
+  longLabels:
+    treatment: adapt
+    description: Cohort names are truncated at 16 characters; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Cohort sizes are compact (9.6L in en-IN); cells stay percentages.
+  timeGaps:
+    treatment: adapt
+    description: A missing month is a blank cell, never 0%.
+  noPrevious:
+    treatment: not-applicable
+    description: Cohorts compare with each other, not with a previous period.
+
+color:
+  job: sequential
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: all
+  notes:
+    - Every cell shows its percentage; colour only adds the shape.
+    - Cell text switches between dark and light ink by cell shade, so it stays readable in both modes.
+    - The React version is a real table with row and column headers.
+
+code:
+  echarts: code/echarts.ts
+  react: code/react.tsx
+  plotly: code/plotly_figure.py
+
+related: [multi-line, kpi-tile-delta]

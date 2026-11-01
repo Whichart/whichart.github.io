@@ -154,3 +154,21 @@ test('review: verdicts', () => {
   assert.ok(['ok', 'poor'].includes(tile.verdict));
   assert.ok(TILE_SIZED.includes(tile.better[0].id), tile.better[0].id);
 });
+
+test('recommend: ordered stages rank the funnel first, with bars as the alternative', () => {
+  const r = recommend({ csv: fixture('funnel/data/sample.csv') });
+  assert.equal(r.ranked[0].id, 'funnel');
+  assert.ok(r.ranked.some((x) => x.id === 'bar-horizontal'), 'ordered stages still count as categories for bars');
+});
+
+test('profile: a numbered period column marks cohort data', () => {
+  const p = profile(parseCsv(fixture('cohort-heatmap/data/sample.csv')).rows);
+  assert.equal(p.columns.find((c) => c.name === 'period')?.role, 'ordinal');
+  assert.equal(p.metrics.periodIndex, true);
+  assert.equal(recommend({ csv: fixture('cohort-heatmap/data/sample.csv') }).ranked[0].id, 'cohort-heatmap');
+});
+
+test('recommend: donut refuses negative parts with a bar suggestion', () => {
+  const donut = recommend({ csv: 'channel,profit\nWeb,8400\nApp,5100\nRetail,-2400\n' }).avoid.find((a) => a.id === 'donut')!;
+  assert.equal(donut.reasons[0].suggest, 'bar-horizontal');
+});

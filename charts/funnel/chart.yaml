@@ -1,0 +1,117 @@
+id: funnel
+name: Funnel chart
+aliases: [conversion funnel, funnel graph, drop-off chart, checkout funnel, sales funnel]
+status: ready
+summary: Shows how many people reach each step of a process and where most of them drop off.
+
+goals: [flow]
+
+data:
+  fields:
+    - role: ordinal
+      count: { min: 1, max: 1 }
+      description: The stages, in order (visit, cart, checkout, purchase).
+    - role: measure
+      count: { min: 1, max: 1 }
+      description: How many people reached each stage.
+  rows: { min: 1 }
+  notes: Rows must be in stage order. Drawn as left-aligned bars rather than trapezoids.
+
+fit:
+  rules:
+    - when: { metric: ordinalFields, op: "=", value: 0 }
+      effect: penalty
+      weight: 0.5
+      reason: A funnel needs ordered stages. Name the column "stage" or "step" if your categories are in order.
+      suggest: bar-horizontal
+    - when: { metric: goal, op: "=", value: flow }
+      effect: boost
+      weight: 0.5
+      reason: Ordered stages with shrinking counts are exactly what a funnel shows.
+    - when: { metric: timeFields, op: ">", value: 0 }
+      effect: penalty
+      weight: 0.4
+      reason: Your data runs over time; a funnel is one period's totals per stage.
+    - when: { metric: hasNegatives, op: "=", value: true }
+      effect: exclude
+      reason: Counts of people at a stage can't be negative.
+    - when: { metric: categories, op: ">", value: 8 }
+      effect: penalty
+      weight: 0.3
+      reason: Funnels with more than 8 stages are hard to read; group the minor steps.
+
+context:
+  space: { tile: poor, card: good, half: good, full: good }
+  audience: { glance: good, explore: good }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - Checkout, sign-up or onboarding flows with ordered steps.
+    - The question is "where do people drop off?".
+  avoidWhen:
+    - The steps aren't strictly sequential, or people can skip them. Use bars and explain.
+    - Comparing funnels across segments. Use small multiples or a table of conversion rates.
+  alternatives:
+    - id: bar-horizontal
+      when: Stages aren't strictly ordered.
+    - id: data-table
+      when: Comparing conversion rates across many segments.
+    - id: sankey
+      when: People branch into several paths.
+  pitfalls:
+    - Trapezoid funnels exaggerate drops; bars on a common baseline don't.
+    - Show the step conversion, not just the count; the drop between steps is the story.
+    - More people at a later step usually means the steps are counted differently; check before presenting.
+
+states:
+  empty:
+    treatment: message
+    description: A short message instead of empty bars.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One bar at 100%; there's nothing to convert yet.
+  allZeros:
+    treatment: adapt
+    description: Zero-length bars labelled 0 with "—" instead of a meaningless percentage.
+  outlier:
+    treatment: adapt
+    description: When a later stage has more people than the one before, its conversion is flagged with ▲ so it gets checked.
+  negative:
+    treatment: message
+    description: People counts can't be negative, so it says so.
+    message: Funnel stages can’t be negative
+  manySeries:
+    treatment: not-applicable
+    description: A funnel is a single series of stages.
+  longLabels:
+    treatment: adapt
+    description: Stage names are truncated at 20 characters; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Counts from 100,000 are compact in the locale (4.6Cr); the tooltip shows the exact count.
+  timeGaps:
+    treatment: not-applicable
+    description: A funnel is one period's totals.
+  noPrevious:
+    treatment: not-applicable
+    description: A funnel compares stages, not periods.
+
+color:
+  job: single
+  maxSeries: 1
+
+accessibility:
+  tableFallback: true
+  labels: all
+  notes:
+    - Every stage is labelled with its count, its share of the first stage, and its step conversion.
+    - The biggest drop is named in text, not just shown by length.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [bar-horizontal, sankey, data-table]

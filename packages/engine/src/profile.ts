@@ -6,6 +6,7 @@ const HINT = {
   geo: /(^|_|\b)(country|region|state|province|city|district|division|zip|postcode|postal|lat|lon|lng|latitude|longitude|geo)(_|\b|$)/i,
   ordinal: /(^|_|\b)(stage|step|tier|level|rank|band|bucket|phase|grade)(_|\b|$)/i,
   comparison: /(^|_|\b)(previous|prev|prior|last_?(period|month|week|year|quarter)|comparison|baseline)(_|\b|$)/i,
+  periodIndex: /^(period|period_index|months?_since\w*|weeks?_since\w*|days?_since\w*|month_number|week_number|age|cohort_age)$/i,
 };
 const MISSING = new Set(['', 'na', 'n/a', 'null', 'none', '-', '—', 'nan', '#n/a']);
 const DAY = 864e5;
@@ -99,6 +100,9 @@ function classify(name: string, values: unknown[], rows: number, forced?: Role):
     if (HINT.id.test(name) && distinct === present.length) return { role: 'id', because: 'name looks like an identifier and every value is unique' };
     if (HINT.geo.test(name)) return { role: 'geo', because: 'name looks like a place (numeric codes)' };
     if (HINT.comparison.test(name)) return { role: 'measure', comparison: true, because: "numbers for the previous period" };
+    if (HINT.periodIndex.test(name) && nums.every((n) => Number.isInteger(n) && n >= 0 && n <= 120)) {
+      return { role: 'ordinal', because: 'numbered periods (0, 1, 2…) since a start' };
+    }
     return { role: 'measure', because: 'values are numbers' };
   }
   if (HINT.geo.test(name)) return { role: 'geo', because: 'name looks like a place' };
@@ -160,6 +164,7 @@ export function profile(rows: Row[], options: ProfileOptions = {}): Profile {
     maxLabelLength: Math.max(0, ...columns.filter((c) => c.maxLength !== undefined).map((c) => c.maxLength as number)),
     outlierRatio: median ? Math.max(...abs) / median : 1,
     sumsToWhole: !!category && measures.length > 0 && !allMeasureValues.some((v) => v < 0),
+    periodIndex: columns.some((c) => c.role === 'ordinal' && c.because.startsWith('numbered periods')),
   };
 
   return { columns, metrics, goals: inferGoals(metrics), summary: summarise(columns, rows.length) };

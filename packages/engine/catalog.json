@@ -177,9 +177,18 @@
       "rules": [
         {
           "when": {
-            "metric": "categoryFields",
-            "op": "=",
-            "value": 0
+            "all": [
+              {
+                "metric": "categoryFields",
+                "op": "=",
+                "value": 0
+              },
+              {
+                "metric": "ordinalFields",
+                "op": "=",
+                "value": 0
+              }
+            ]
           },
           "effect": "exclude",
           "reason": "Bars compare categories. Without a category column there's nothing to put on the bars."
@@ -285,6 +294,140 @@
       "code": [
         "echarts",
         "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "cohort-heatmap",
+      "name": "Cohort retention heatmap",
+      "summary": "For each group of customers who started in the same month, the share who came back in each later month.",
+      "goals": [
+        "trend",
+        "distribution"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "ordinal",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "categoryFields",
+                "op": "=",
+                "value": 0
+              },
+              {
+                "metric": "timeFields",
+                "op": "=",
+                "value": 0
+              }
+            ]
+          },
+          "effect": "exclude",
+          "reason": "A cohort chart needs a cohort column, e.g. first-order month."
+        },
+        {
+          "when": {
+            "metric": "periodIndex",
+            "op": "=",
+            "value": false
+          },
+          "effect": "exclude",
+          "reason": "It needs a numbered period column, e.g. months_since_first_order (0, 1, 2…)."
+        },
+        {
+          "when": {
+            "metric": "periodIndex",
+            "op": "=",
+            "value": true
+          },
+          "effect": "boost",
+          "weight": 0.6,
+          "reason": "Cohorts with numbered periods since they started are exactly what a retention grid shows."
+        },
+        {
+          "when": {
+            "metric": "goal",
+            "op": "=",
+            "value": "trend"
+          },
+          "effect": "boost",
+          "weight": 0.15,
+          "reason": "Shows how loyalty changes from one cohort to the next."
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": ">",
+            "value": 12
+          },
+          "effect": "penalty",
+          "weight": 0.1,
+          "reason": "Only the latest 12 cohorts are shown."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "in",
+            "value": [
+              "tile",
+              "card"
+            ]
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "A cohort grid needs room for every cell's label."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "never",
+          "card": "poor",
+          "half": "ok",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "ok",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "ok"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "multi-line",
+          "when": "Only a few cohorts matter; one retention curve each."
+        },
+        {
+          "id": "kpi-tile-delta",
+          "when": "One headline retention number is enough."
+        }
+      ],
+      "code": [
+        "echarts",
+        "react",
         "plotly"
       ]
     },
@@ -537,6 +680,123 @@
         {
           "id": "stacked-bar-100",
           "when": "Comparing the mix across several groups."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "funnel",
+      "name": "Funnel chart",
+      "summary": "Shows how many people reach each step of a process and where most of them drop off.",
+      "goals": [
+        "flow"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "ordinal",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "ordinalFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "A funnel needs ordered stages. Name the column \"stage\" or \"step\" if your categories are in order.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "goal",
+            "op": "=",
+            "value": "flow"
+          },
+          "effect": "boost",
+          "weight": 0.5,
+          "reason": "Ordered stages with shrinking counts are exactly what a funnel shows."
+        },
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": ">",
+            "value": 0
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "Your data runs over time; a funnel is one period's totals per stage."
+        },
+        {
+          "when": {
+            "metric": "hasNegatives",
+            "op": "=",
+            "value": true
+          },
+          "effect": "exclude",
+          "reason": "Counts of people at a stage can't be negative."
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": ">",
+            "value": 8
+          },
+          "effect": "penalty",
+          "weight": 0.3,
+          "reason": "Funnels with more than 8 stages are hard to read; group the minor steps."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "poor",
+          "card": "good",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "bar-horizontal",
+          "when": "Stages aren't strictly ordered."
+        },
+        {
+          "id": "data-table",
+          "when": "Comparing conversion rates across many segments."
+        },
+        {
+          "id": "sankey",
+          "when": "People branch into several paths."
         }
       ],
       "code": [

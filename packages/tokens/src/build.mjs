@@ -188,7 +188,8 @@ export const theme = ${JSON.stringify(theme, null, 2)};
 export function palette(tokens) {
   const pick = (mode) => {
     const m = tokens.modes[mode];
-    return { series: m.categorical, primary: m.ink.primary, secondary: m.ink.secondary, muted: m.ink.muted, grid: m.grid, axis: m.axis, surface: m.surface };
+    // sequential runs low → high in each mode (dark mode flips the anchor, as in the CSS).
+    return { series: m.categorical, primary: m.ink.primary, secondary: m.ink.secondary, muted: m.ink.muted, grid: m.grid, axis: m.axis, surface: m.surface, sequential: sequential(tokens, mode) };
   };
   return { light: pick('light'), dark: pick('dark') };
 }
