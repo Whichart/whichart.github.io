@@ -1,0 +1,73 @@
+{
+  "columns": [
+    "value",
+    "target",
+    "elapsed"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Revenue this month",
+      "locale": "en-US",
+      "currency": "USD"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Revenue this month",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Revenue this month",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Revenue this month (flash sale)",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Net profit this month",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Revenue from all channels this month after refunds and fees",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Revenue this quarter",
+        "locale": "en-IN",
+        "currency": "BDT"
+      }
+    },
+    "noPrevious": {
+      "file": "states/noPrevious.csv",
+      "options": {
+        "label": "Revenue this month",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    }
+  }
+}

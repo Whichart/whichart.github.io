@@ -73,6 +73,23 @@ export function adapt(chart: string, rows: Row[], enc: Encoding): Adapted | null
     return { rows: out, options: { ...base, label } };
   }
 
+  if (chart === 'kpi-tile-sparkline' && enc.time) {
+    return { rows: daily(rows, enc.time, measure), options: base };
+  }
+
+  if (chart === 'progress-meter') {
+    // Columns are recognised by name: value, a target (target, goal, quota, budget), optionally elapsed (0–1).
+    const all = Object.keys(rows[0] ?? {});
+    const target = all.find((c) => /target|goal|quota|budget/i.test(c));
+    const elapsed = all.find((c) => /elapsed|pace|progress_of_period/i.test(c));
+    const valueCol = enc.measures.find((m) => m !== target && m !== elapsed) ?? measure;
+    const r = rows[rows.length - 1];
+    return {
+      rows: r ? [{ value: parseNumber(r[valueCol]), target: target ? parseNumber(r[target]) : null, elapsed: elapsed ? parseNumber(r[elapsed]) : null }] : [],
+      options: { ...base, label: pretty(valueCol), currency: currencyOf(rows, valueCol) },
+    };
+  }
+
   if (chart === 'kpi-tile-delta') {
     if (enc.comparison && rows.length <= 1) {
       const r = rows[0];

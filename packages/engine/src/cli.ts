@@ -48,7 +48,8 @@ if (chart) {
     });
     if (rec.avoid.length) {
       console.log('\nNot a good fit:');
-      for (const a of rec.avoid) console.log(`  ✕ ${a.name}: ${a.reasons.map((r) => r.text).join(' ')}`);
+      // The first reason is the main one; agents get all of them with --json.
+      for (const a of rec.avoid) console.log(`  ✕ ${a.name}: ${a.reasons[0].text}`);
     }
   }
 }

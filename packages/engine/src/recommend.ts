@@ -140,6 +140,9 @@ export function recommend(input: RecommendInput, charts: CatalogEntry[] = catalo
   const ctx = input.context ?? {};
   const given = !!input.goal;
   const goals: Goal[] = input.goal ? [input.goal] : p.goals;
+  // Rules react to the goal: an explicit one, or only the single most likely inferred one.
+  // Letting every possible inferred goal trigger rules over-rewards niche charts.
+  const ruleGoals: Goal[] = input.goal ? [input.goal] : p.goals.slice(0, 1);
 
   const ranked: Ranked[] = [];
   const avoid: Avoided[] = [];
@@ -152,7 +155,7 @@ export function recommend(input: RecommendInput, charts: CatalogEntry[] = catalo
 
     // Explicit exclude rules first: they carry the best explanation and a suggestion.
     for (const rule of entry.rules) {
-      if (!evaluate(rule.when, p, goals, ctx)) continue;
+      if (!evaluate(rule.when, p, ruleGoals, ctx)) continue;
       const note = { text: rule.reason, ...(rule.fix ? { fix: rule.fix } : {}), ...(rule.suggest ? { suggest: rule.suggest } : {}) };
       if (rule.effect === 'exclude') blocks.push(note);
       else if (rule.effect === 'boost') {

@@ -264,6 +264,138 @@
       ]
     },
     {
+      "id": "kpi-tile-sparkline",
+      "name": "KPI tile with sparkline",
+      "summary": "One headline number for the period, its honest change against the previous period, and a sparkline of how it got there.",
+      "goals": [
+        "kpi",
+        "trend"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "time",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 0
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "The sparkline needs daily data. With a single number, use the KPI tile with change.",
+          "suggest": "kpi-tile-delta"
+        },
+        {
+          "when": {
+            "metric": "series",
+            "op": ">",
+            "value": 1
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "One tile shows one series. Several series need one tile each."
+        },
+        {
+          "when": {
+            "metric": "goal",
+            "op": "=",
+            "value": "kpi"
+          },
+          "effect": "boost",
+          "weight": 0.45,
+          "reason": "A headline number with its trend is what dashboards lead with."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "in",
+            "value": [
+              "tile",
+              "card"
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.4,
+          "reason": "Built for dashboard tiles and cards."
+        },
+        {
+          "when": {
+            "metric": "pointsPerSeries",
+            "op": ">=",
+            "value": 7
+          },
+          "effect": "boost",
+          "weight": 0.15,
+          "reason": "Enough history for the sparkline to show a shape."
+        },
+        {
+          "when": {
+            "metric": "audience",
+            "op": "=",
+            "value": "explore"
+          },
+          "effect": "penalty",
+          "weight": 0.2,
+          "reason": "Analysts exploring need the full chart behind the number.",
+          "suggest": "line"
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "good",
+          "card": "good",
+          "half": "ok",
+          "full": "poor"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "ok"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "ok",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "kpi-tile-delta",
+          "when": "No daily data, or the shape doesn't matter."
+        },
+        {
+          "id": "period-comparison",
+          "when": "You need to see this period against the last one day by day."
+        },
+        {
+          "id": "line",
+          "when": "The full history matters."
+        }
+      ],
+      "code": [
+        "vanilla",
+        "react",
+        "plotly"
+      ]
+    },
+    {
       "id": "line",
       "name": "Line chart",
       "summary": "Shows how one measure changes over continuous time.",
@@ -682,6 +814,111 @@
       ]
     },
     {
+      "id": "progress-meter",
+      "name": "Progress meter",
+      "summary": "How far a value has come towards its target, and whether it's on pace to get there.",
+      "goals": [
+        "kpi"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 3
+            }
+          }
+        ],
+        "rows": {
+          "min": 0,
+          "max": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "goal",
+            "op": "=",
+            "value": "kpi"
+          },
+          "effect": "boost",
+          "weight": 0.3,
+          "reason": "One number against a target reads instantly as a filled bar."
+        },
+        {
+          "when": {
+            "metric": "measureFields",
+            "op": "<",
+            "value": 2
+          },
+          "effect": "exclude",
+          "reason": "A meter needs a target to measure against.",
+          "suggest": "kpi-tile-delta"
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "in",
+            "value": [
+              "tile",
+              "card"
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.3,
+          "reason": "Built for dashboard tiles and cards."
+        },
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": ">",
+            "value": 0
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "Your data is a time series; a meter shows a single moment.",
+          "fix": "Sum the period first and compare it with its target."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "good",
+          "card": "good",
+          "half": "ok",
+          "full": "poor"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "ok"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "kpi-tile-delta",
+          "when": "There's no target, only a previous period."
+        },
+        {
+          "id": "bullet-chart",
+          "when": "You also need qualitative ranges or several targets."
+        },
+        {
+          "id": "gauge",
+          "when": "Rarely. A gauge shows the same thing in more space and is harder to read."
+        }
+      ],
+      "code": [
+        "vanilla",
+        "react",
+        "plotly"
+      ]
+    },
+    {
       "id": "sparkline",
       "name": "Sparkline",
       "summary": "A small, axis-free line that shows the shape of a measure over time, usually inside a KPI tile or table cell.",
@@ -737,7 +974,7 @@
             "value": "tile"
           },
           "effect": "boost",
-          "weight": 0.5,
+          "weight": 0.35,
           "reason": "Built for small spaces such as KPI tiles and table cells."
         },
         {
