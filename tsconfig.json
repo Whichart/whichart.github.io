@@ -11,5 +11,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["charts/**/*.ts", "charts/**/*.tsx", "scripts/**/*.ts", "scripts/**/*.tsx", "packages/engine/**/*.ts"]
+  "include": ["charts/**/*.ts", "charts/**/*.tsx", "scripts/**/*.ts", "scripts/**/*.tsx", "packages/engine/**/*.ts", "packages/mcp/src/**/*.ts"]
 }

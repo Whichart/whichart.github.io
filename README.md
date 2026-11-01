@@ -11,6 +11,16 @@ Find the right chart for your dashboard, see how it handles empty, messy and edg
 
 Site: <https://whichart.github.io> · Status: early development. See [PLAN.md](PLAN.md).
 
+## For AI agents
+
+Give your coding agent the same rules, as tools. The [MCP server](packages/mcp) has `recommend_chart`, `get_chart`, `list_charts` and `review_chart`; the [Agent Skill](skill) tells it to use them before showing any chart.
+
+```sh
+claude mcp add whichart -- npx -y @whichart/mcp   # once @whichart/mcp is on npm; see packages/mcp for from-source setup
+```
+
+Files for any agent: [`llms.txt`](https://whichart.github.io/llms.txt), [`llms-full.txt`](https://whichart.github.io/llms-full.txt), `/charts/<id>.md` and [`catalog.json`](https://whichart.github.io/catalog.json). Setup for Cursor, VS Code and Windsurf: <https://whichart.github.io/agents/>.
+
 ## Repository layout
 
 ```

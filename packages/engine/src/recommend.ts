@@ -1,6 +1,6 @@
 import catalogJson from '../catalog.json' with { type: 'json' };
 import { parseCsv } from './csv.ts';
-import { profile as profileRows, type ProfileOptions } from './profile.ts';
+import { profile as profileRows, profileFromSchema, type DataSchema, type ProfileOptions } from './profile.ts';
 import type { Avoided, CatalogEntry, Condition, Context, Encoding, Goal, Profile, Ranked, Recommendation, Role, Row, Suitability } from './types.ts';
 
 export const catalog = catalogJson.charts as CatalogEntry[];
@@ -17,8 +17,10 @@ const AGGREGATE_PENALTY = 0.15;
 export interface RecommendInput {
   rows?: Row[];
   csv?: string;
-  /** A profile built elsewhere, e.g. by an agent describing its data instead of sending it. */
+  /** A profile built elsewhere. */
   profile?: Profile;
+  /** A description of the data, for agents that won't send the rows. */
+  schema?: DataSchema;
   goal?: Goal;
   context?: Context;
   roles?: ProfileOptions['roles'];
@@ -138,7 +140,7 @@ function shapeReason(entry: CatalogEntry, p: Profile): string {
 }
 
 export function recommend(input: RecommendInput, charts: CatalogEntry[] = catalog): Recommendation {
-  let p = input.profile;
+  let p = input.profile ?? (input.schema ? profileFromSchema(input.schema) : undefined);
   if (!p) {
     const parsed = input.csv !== undefined ? parseCsv(input.csv) : { columns: undefined, rows: input.rows ?? [] };
     p = profileRows(parsed.rows, { roles: input.roles, columns: parsed.columns });

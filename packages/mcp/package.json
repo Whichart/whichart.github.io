@@ -1,0 +1,47 @@
+{
+  "name": "@whichart/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Whichart: recommend a chart for your data, get its tested code and edge-case rules, and review a chart choice before showing it.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "whichart-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "mcpName": "io.github.Whichart/whichart",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "data-visualization",
+    "dataviz",
+    "charts",
+    "chart-recommendation",
+    "dashboard",
+    "echarts",
+    "recharts",
+    "plotly",
+    "ai-agents"
+  ],
+  "homepage": "https://whichart.github.io/agents/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Whichart/whichart.github.io.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": "https://github.com/Whichart/whichart.github.io/issues",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.5"
+  }
+}

@@ -17,6 +17,9 @@ export const GET: APIRoute = ({ site }) => {
 Rules that apply everywhere: never use a dual y-axis; assign series colours in a fixed order and never more than 8; a percentage change from zero or across a sign change is meaningless, so show the absolute change; show "New" when there is no previous period; break lines at missing dates instead of joining across them.
 
 Machine-readable rules for every chart: ${abs('catalog.json')}
+Every chart in full, with code, in one file: ${abs('llms-full.txt')}
+Each chart page is also available as Markdown: add .md, e.g. ${abs('charts/line.md')}
+MCP server with recommend_chart, get_chart, list_charts and review_chart (npx -y @whichart/mcp), and an Agent Skill: ${abs('agents/')}
 
 ## Patterns (builders' questions)
 ${section('pattern')}

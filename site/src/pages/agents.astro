@@ -3,12 +3,20 @@ import Base from '../layouts/Base.astro';
 import { url, REPO } from '../lib/url';
 const site = new URL(url(), Astro.site).href;
 const title = 'Whichart for AI agents: chart rules, code and review as tools | Whichart';
-const description = 'Give your coding agent Whichart: recommend the right chart for data, get tested code, and review a chart choice before shipping. llms.txt, a JSON catalogue, and an MCP server.';
+const description = 'Give your coding agent Whichart: an MCP server and Agent Skill that recommend the right chart for your data, return tested code with edge-case rules, and review a chart before it ships.';
 const tools = [
   ['recommend_chart', 'Data or a schema, plus an optional goal and space → ranked charts with reasons, and an avoid list.'],
   ['get_chart', 'Chart id and library → guidance, edge-case rules and ready code.'],
-  ['list_charts', 'Browse by category, data shape or industry.'],
+  ['list_charts', 'Every written chart, filtered by goal or industry, with the builder questions each one answers.'],
   ['review_chart', '“Is this chart right for this data?” → a verdict, problems and better options. Call it before showing any chart.'],
+];
+const RAW = 'https://raw.githubusercontent.com/Whichart/whichart.github.io/main';
+const npx = '"command": "npx", "args": ["-y", "@whichart/mcp"]';
+const setups: [string, string, string][] = [
+  ['Claude Code', 'terminal', 'claude mcp add whichart -- npx -y @whichart/mcp'],
+  ['Cursor', '.cursor/mcp.json', `{ "mcpServers": { "whichart": { ${npx} } } }`],
+  ['VS Code', '.vscode/mcp.json', `{ "servers": { "whichart": { "type": "stdio", ${npx} } } }`],
+  ['Windsurf', '~/.codeium/windsurf/mcp_config.json', `{ "mcpServers": { "whichart": { ${npx} } } }`],
 ];
 ---
 
@@ -18,31 +26,51 @@ const tools = [
     <p class="lede">Agents write most chart code now, and they often pick the wrong chart or miss the edge cases. Whichart gives them the same rules people see on this site, as files and tools.</p>
 
     <section class="section">
-      <h2>Available now</h2>
+      <h2>MCP server</h2>
+      <p class="muted">Four tools, bundled with every chart, guide and code sample. It runs on your machine, needs no key, and your data never leaves it.</p>
+      <table>
+        <tbody>{tools.map(([name, what]) => <tr><td><code>{name}</code></td><td>{what}</td></tr>)}</tbody>
+      </table>
+
+      <h3>Set up</h3>
+      <p class="note">The npm package <code>@whichart/mcp</code> is being published. Until it is, use the <a href="#source">from-source setup</a> below; the commands here will work as soon as it’s live.</p>
+      {setups.map(([name, where, code]) => (
+        <div class="setup">
+          <h4>{name} <span class="muted">{where}</span></h4>
+          <pre><code>{code}</code></pre>
+        </div>
+      ))}
+      <h4 id="source">From source (works today)</h4>
+      <pre><code>{`git clone ${REPO} && cd whichart.github.io
+pnpm install && pnpm --filter @whichart/mcp build
+claude mcp add whichart -- node "$PWD/packages/mcp/dist/index.js"`}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Agent Skill</h2>
+      <p class="muted">The tools work best when your agent knows when to call them. The <a href={`${REPO}/tree/main/skill`}>Whichart skill</a> tells it to recommend before it charts, build from the tested code and edge-case rules, and call <code>review_chart</code> before showing a chart it chose itself.</p>
+      <pre><code>{`mkdir -p ~/.claude/skills/whichart
+curl -fsSL ${RAW}/skill/whichart/SKILL.md -o ~/.claude/skills/whichart/SKILL.md`}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Files for any agent</h2>
       <ul class="list">
-        <li><a href={url('llms.txt')}><code>/llms.txt</code></a>: an index of every chart and pattern for agents that read docs.</li>
+        <li><a href={url('llms.txt')}><code>/llms.txt</code></a>: an index of every chart and pattern.</li>
+        <li><a href={url('llms-full.txt')}><code>/llms-full.txt</code></a>: every chart in full, rules, edge cases and code, in one file.</li>
+        <li><a href={url('charts/line.md')}><code>/charts/&lt;id&gt;.md</code></a>: one chart as Markdown, the same text <code>get_chart</code> returns.</li>
         <li><a href={url('catalog.json')}><code>/catalog.json</code></a>: every chart’s data-shape rules, fit rules and context fit, as JSON.</li>
-        <li>The recommendation engine as a command-line tool, from the repo: <code>pnpm whichart data.csv --goal trend</code> (<a href={`${REPO}/tree/main/packages/engine`}>docs</a>).</li>
+        <li>The recommendation engine on the command line: <code>pnpm whichart data.csv --goal trend</code> (<a href={`${REPO}/tree/main/packages/engine`}>docs</a>).</li>
       </ul>
     </section>
 
     <section class="section">
-      <h2>Coming soon: MCP server and Agent Skill</h2>
-      <p class="muted">One command for Claude Code, Cursor, Windsurf and VS Code. Tools:</p>
-      <table>
-        <tbody>{tools.map(([name, what]) => <tr><td><code>{name}</code></td><td>{what}</td></tr>)}</tbody>
-      </table>
-      <p class="muted">Planned setup, once it’s published:</p>
-      <pre><code>npx @whichart/mcp</code></pre>
-      <p class="muted">Want to know when it ships? <a href={REPO}>Watch the repository on GitHub</a>.</p>
-    </section>
-
-    <section class="section">
-      <h2>Tell your agent</h2>
-      <p class="muted">Until the MCP server ships, add this to your agent’s instructions (CLAUDE.md, .cursorrules, AGENTS.md):</p>
+      <h2>No tools? Tell your agent</h2>
+      <p class="muted">Add this to its instructions (CLAUDE.md, AGENTS.md, .cursorrules):</p>
       <pre><code>Before adding a chart, check {site}llms.txt for the right chart type,
-its edge cases (empty data, zeros, no previous period, gaps in time)
-and ready code. Never use a dual y-axis.</code></pre>
+then read its page at {site}charts/&lt;id&gt;.md: follow its edge cases
+(empty data, zeros, no previous period, gaps in time) and start from
+its code. Never use a dual y-axis.</code></pre>
     </section>
   </div>
 </Base>
@@ -53,5 +81,8 @@ and ready code. Never use a dual y-axis.</code></pre>
   .list li { margin-bottom: 8px; }
   table { border-collapse: collapse; width: 100%; font-size: 14px; }
   td { padding: 8px 10px; border-bottom: 1px solid var(--wc-grid); vertical-align: top; }
+  .note { background: var(--wc-surface); border: 1px solid var(--wc-border); border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+  h4 { margin: 18px 0 6px; font-size: 15px; }
+  h4 .muted { font-weight: 400; font-size: 13px; margin-left: 6px; }
   pre { background: var(--wc-surface); border: 1px solid var(--wc-border); border-radius: 10px; padding: 14px; overflow-x: auto; }
 </style>
