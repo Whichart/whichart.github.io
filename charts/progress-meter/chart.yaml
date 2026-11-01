@@ -1,0 +1,111 @@
+id: progress-meter
+name: Progress meter
+aliases: [progress bar, goal meter, target bar, quota tracker, goal progress chart]
+status: ready
+summary: How far a value has come towards its target, and whether it's on pace to get there.
+
+goals: [kpi]
+
+preview: { width: 300, height: 190 }
+
+data:
+  fields:
+    - role: measure
+      count: { min: 1, max: 3 }
+      description: The current value, its target, and optionally how much of the period has passed (0–1).
+  rows: { min: 0, max: 1 }
+
+fit:
+  rules:
+    - when: { metric: goal, op: "=", value: kpi }
+      effect: boost
+      weight: 0.3
+      reason: One number against a target reads instantly as a filled bar.
+    - when: { metric: measureFields, op: "<", value: 2 }
+      effect: exclude
+      reason: A meter needs a target to measure against.
+      suggest: kpi-tile-delta
+    - when: { metric: space, op: "in", value: [tile, card] }
+      effect: boost
+      weight: 0.3
+      reason: Built for dashboard tiles and cards.
+    - when: { metric: timeFields, op: ">", value: 0 }
+      effect: penalty
+      weight: 0.4
+      reason: Your data is a time series; a meter shows a single moment.
+      fix: Sum the period first and compare it with its target.
+
+context:
+  space: { tile: good, card: good, half: ok, full: poor }
+  audience: { glance: good, explore: ok }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - 'A number has a target: monthly revenue goal, sales quota, fundraising, storage limit.'
+    - '"Are we on track?" is the question. Add pace with the share of the period that has passed.'
+  avoidWhen:
+    - There's no real target. A made-up target turns a number into a fake score.
+    - You need ranges such as poor, fair and good. Use a bullet chart.
+  alternatives:
+    - id: kpi-tile-delta
+      when: There's no target, only a previous period.
+    - id: bullet-chart
+      when: You also need qualitative ranges or several targets.
+    - id: gauge
+      when: Rarely. A gauge shows the same thing in more space and is harder to read.
+  pitfalls:
+    - Progress without pace misleads. 60% on day 10 is great; 60% on day 28 is a miss.
+    - Don't cap the number at 100%. Over target is good news; say how much.
+    - Don't colour the bar red or green; the status line carries good and bad, with an arrow and words.
+
+states:
+  empty:
+    treatment: message
+    description: A dash, an empty track, and a short message.
+    message: No data yet
+  singlePoint:
+    treatment: not-applicable
+    description: A meter always shows a single value.
+  allZeros:
+    treatment: adapt
+    description: Shows 0 and 0% with an empty bar; pace still says whether that's a problem yet.
+  outlier:
+    treatment: adapt
+    description: Over target fills the bar and says how far over, e.g. "180% of target".
+  negative:
+    treatment: adapt
+    description: A negative value keeps its sign in the number; the bar stays empty rather than drawing backwards.
+  manySeries:
+    treatment: not-applicable
+    description: One meter shows one value.
+  longLabels:
+    treatment: adapt
+    description: The label wraps to two lines, then truncates.
+  largeNumbers:
+    treatment: adapt
+    description: Compact in the locale (৳25.7Cr of ৳36.5Cr).
+  timeGaps:
+    treatment: not-applicable
+    description: A meter has no time axis.
+  noPrevious:
+    treatment: adapt
+    description: With no target to compare against, it shows the value and "No target set" instead of inventing one.
+
+color:
+  job: ordinal
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: all
+  notes:
+    - Reads as a sentence, e.g. "Revenue this month $35,200 of $50,000, 70%, Ahead of pace".
+    - Status uses an arrow and words, never colour alone.
+
+code:
+  vanilla: code/vanilla.ts
+  react: code/react.tsx
+  plotly: code/plotly_figure.py
+
+related: [kpi-tile-delta, bullet-chart, gauge]

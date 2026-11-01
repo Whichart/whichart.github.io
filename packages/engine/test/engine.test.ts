@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { parseCsv, parseDate, parseNumber, profile, recommend, review } from '../src/index.ts';
 import type { CatalogEntry } from '../src/types.ts';
 
+const TILE_SIZED = ['sparkline', 'kpi-tile-delta', 'kpi-tile-sparkline'];
+
 const fixture = (path: string) => readFileSync(new URL(`../../../charts/${path}`, import.meta.url), 'utf8');
 const lineSample = fixture('line/data/sample.csv');
 const kpiSample = fixture('kpi-tile-delta/data/sample.csv');
@@ -89,7 +91,7 @@ test('recommend: a daily series ranks the line chart first', () => {
 
 test('recommend: in a tile, tile-sized charts beat the line chart', () => {
   const r = recommend({ csv: lineSample, context: { space: 'tile' } });
-  assert.ok(['sparkline', 'kpi-tile-delta'].includes(r.ranked[0].id), r.ranked[0].id);
+  assert.ok(TILE_SIZED.includes(r.ranked[0].id), r.ranked[0].id);
   const rank = (id: string) => r.ranked.findIndex((x) => x.id === id);
   assert.ok(rank('kpi-tile-delta') < rank('line'));
   const line = r.ranked.find((x) => x.id === 'line')!;
@@ -118,7 +120,7 @@ test('recommend: KPI tile on a time series asks to summarise first', () => {
 
 test('recommend: an explicit goal outweighs inferred ones', () => {
   const r = recommend({ csv: lineSample, goal: 'kpi' });
-  assert.equal(r.ranked[0].id, 'kpi-tile-delta');
+  assert.ok(r.ranked[0].id.startsWith('kpi-tile'), r.ranked[0].id);
   assert.match(r.ranked[0].reasons[0], /Made for your goal: single-KPI/);
 });
 
@@ -150,5 +152,5 @@ test('review: verdicts', () => {
   assert.equal(review('donut', { csv: lineSample }).verdict, 'unknown');
   const tile = review('line', { csv: lineSample, context: { space: 'tile' } });
   assert.ok(['ok', 'poor'].includes(tile.verdict));
-  assert.ok(['sparkline', 'kpi-tile-delta'].includes(tile.better[0].id), tile.better[0].id);
+  assert.ok(TILE_SIZED.includes(tile.better[0].id), tile.better[0].id);
 });

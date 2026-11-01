@@ -1,0 +1,120 @@
+id: kpi-tile-sparkline
+name: KPI tile with sparkline
+aliases: [stat card with trend, metric card with sparkline, scorecard with trend line, kpi card with chart]
+status: ready
+summary: One headline number for the period, its honest change against the previous period, and a sparkline of how it got there.
+
+goals: [kpi, trend]
+
+data:
+  fields:
+    - role: time
+      count: { min: 1, max: 1 }
+      description: Daily dates covering two periods (56 days for the default 28-day period).
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 0 }
+  notes: The period is summed by default; use average for rates and last for stock metrics such as subscribers.
+
+fit:
+  rules:
+    - when: { metric: timeFields, op: "=", value: 0 }
+      effect: exclude
+      reason: The sparkline needs daily data. With a single number, use the KPI tile with change.
+      suggest: kpi-tile-delta
+    - when: { metric: series, op: ">", value: 1 }
+      effect: penalty
+      weight: 0.4
+      reason: One tile shows one series. Several series need one tile each.
+    - when: { metric: goal, op: "=", value: kpi }
+      effect: boost
+      weight: 0.45
+      reason: A headline number with its trend is what dashboards lead with.
+    - when: { metric: space, op: "in", value: [tile, card] }
+      effect: boost
+      weight: 0.4
+      reason: Built for dashboard tiles and cards.
+    - when: { metric: pointsPerSeries, op: ">=", value: 7 }
+      effect: boost
+      weight: 0.15
+      reason: Enough history for the sparkline to show a shape.
+    - when: { metric: audience, op: "=", value: explore }
+      effect: penalty
+      weight: 0.2
+      reason: Analysts exploring need the full chart behind the number.
+      suggest: line
+
+context:
+  space: { tile: good, card: good, half: ok, full: poor }
+  audience: { glance: good, explore: ok }
+  medium: { dashboard: good, report: ok, slide: good }
+
+guidance:
+  useWhen:
+    - Leading a dashboard with 3–5 headline numbers, where the recent shape matters as much as the total.
+    - Revenue, orders, sessions or sign-ups for the last 28 days.
+  avoidWhen:
+    - Only the number matters. Use the KPI tile with change.
+    - The shape needs axes and exact values. Use a line chart.
+  alternatives:
+    - id: kpi-tile-delta
+      when: No daily data, or the shape doesn't matter.
+    - id: period-comparison
+      when: You need to see this period against the last one day by day.
+    - id: line
+      when: The full history matters.
+  pitfalls:
+    - Summing a rate (conversion, average order value) is wrong. Set aggregate to average.
+    - Summing a stock metric (subscribers, balance) is wrong. Set aggregate to last.
+    - The sparkline has no axis; never read its height as an amount.
+
+states:
+  empty:
+    treatment: message
+    description: A dash instead of zero, with a short message.
+    message: No data yet
+  singlePoint:
+    treatment: adapt
+    description: The single day's value, a "New" badge, and a single dot.
+  allZeros:
+    treatment: adapt
+    description: Shows 0 and "No change" in grey; the sparkline runs along the bottom.
+  outlier:
+    treatment: adapt
+    description: A change of 6× or more shows as a multiple; the sparkline keeps its linear scale.
+  negative:
+    treatment: adapt
+    description: Negative totals keep their sign; a sign flip shows the absolute change; a dashed zero line appears in the sparkline.
+  manySeries:
+    treatment: not-applicable
+    description: One tile shows one number.
+  longLabels:
+    treatment: adapt
+    description: The label wraps to two lines, then truncates; full label in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: From 100,000 the value is compact in the locale (৳1.6Cr); full value in the tooltip.
+  timeGaps:
+    treatment: adapt
+    description: The total covers the days that have data; the sparkline breaks at missing days.
+  noPrevious:
+    treatment: adapt
+    description: A neutral "New" badge instead of a change; the sparkline shows the days so far.
+
+color:
+  job: status
+  maxSeries: 1
+
+accessibility:
+  tableFallback: false
+  labels: all
+  notes:
+    - The tile reads as a sentence, e.g. "Revenue $64,210, up 12.4% vs previous 28 days".
+    - The sparkline is decorative for screen readers; the sentence carries the meaning.
+
+code:
+  vanilla: code/vanilla.ts
+  react: code/react.tsx
+  plotly: code/plotly_figure.py
+
+related: [kpi-tile-delta, sparkline, period-comparison]

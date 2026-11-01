@@ -27,7 +27,7 @@ fit:
       suggest: multi-line
     - when: { metric: space, op: "=", value: tile }
       effect: boost
-      weight: 0.5
+      weight: 0.35
       reason: Built for small spaces such as KPI tiles and table cells.
     - when: { metric: space, op: "in", value: [half, full] }
       effect: penalty

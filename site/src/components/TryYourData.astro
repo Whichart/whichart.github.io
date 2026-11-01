@@ -98,7 +98,7 @@ const samples = [
         const li = el('li');
         const link = el('a', '', a.name);
         link.href = url(`charts/${a.id}/`);
-        li.append(link, el('span', '', `: ${a.reasons.map((x) => x.text).join(' ')}`));
+        li.append(link, el('span', '', `: ${a.reasons[0].text}`));
         return li;
       }),
     );
