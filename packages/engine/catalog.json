@@ -142,6 +142,410 @@
       ]
     },
     {
+      "id": "bar-horizontal",
+      "name": "Horizontal bar chart",
+      "summary": "Compares one measure across categories with bars sorted largest first, so the order tells the story.",
+      "goals": [
+        "compare",
+        "ranking"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "category",
+            "count": {
+              "min": 1,
+              "max": 1
+            },
+            "cardinality": {
+              "max": 40,
+              "ideal": 8
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "categoryFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "Bars compare categories. Without a category column there's nothing to put on the bars."
+        },
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": ">",
+            "value": 0
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "Your data runs over time; summing it into bars loses the trend.",
+          "suggest": "line"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "in",
+                "value": [
+                  "compare",
+                  "ranking"
+                ]
+              },
+              {
+                "metric": "categoryFields",
+                "op": ">=",
+                "value": 1
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.4,
+          "reason": "Bars on a common baseline are the most accurately compared shape."
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": "<",
+            "value": 2
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "One bar compares nothing.",
+          "suggest": "kpi-tile-delta"
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": ">",
+            "value": 12
+          },
+          "effect": "penalty",
+          "weight": 0.2,
+          "reason": "Beyond 12 bars the tail is folded into \"Other\".",
+          "fix": "Show the top items, or use a table for the full list.",
+          "suggest": "top-n-table"
+        },
+        {
+          "when": {
+            "metric": "maxLabelLength",
+            "op": ">",
+            "value": 12
+          },
+          "effect": "boost",
+          "weight": 0.1,
+          "reason": "Horizontal bars keep long category names readable."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "poor",
+          "card": "good",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "top-n-table",
+          "when": "Exact values matter as much as the ranking."
+        },
+        {
+          "id": "stacked-bar",
+          "when": "Each category splits into parts."
+        },
+        {
+          "id": "dot-plot",
+          "when": "Values are large and close together, so bar lengths look the same."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "data-table",
+      "name": "Data table",
+      "summary": "Exact values in typed, sortable columns, with only the cells that need attention highlighted.",
+      "goals": [
+        "compare",
+        "ranking"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "category",
+            "count": {
+              "min": 0,
+              "max": 3
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 12
+            }
+          }
+        ],
+        "rows": {
+          "min": 0
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "audience",
+            "op": "=",
+            "value": "explore"
+          },
+          "effect": "boost",
+          "weight": 0.4,
+          "reason": "Analysts look things up; exact values beat any chart."
+        },
+        {
+          "when": {
+            "metric": "measureFields",
+            "op": ">=",
+            "value": 3
+          },
+          "effect": "boost",
+          "weight": 0.3,
+          "reason": "Several measures per item read best as columns."
+        },
+        {
+          "when": {
+            "metric": "rows",
+            "op": ">",
+            "value": 20
+          },
+          "effect": "boost",
+          "weight": 0.15,
+          "reason": "Many rows; a table with sorting handles them."
+        },
+        {
+          "when": {
+            "metric": "audience",
+            "op": "=",
+            "value": "glance"
+          },
+          "effect": "penalty",
+          "weight": 0.3,
+          "reason": "A table has no shape to read at a glance."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "exclude",
+          "reason": "A table doesn't fit in a KPI tile."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "never",
+          "card": "ok",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "poor",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "ok",
+          "report": "good",
+          "slide": "poor"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "top-n-table",
+          "when": "One measure, ranked, with inline bars."
+        },
+        {
+          "id": "bar-horizontal",
+          "when": "The ranking matters more than exact values."
+        }
+      ],
+      "code": [
+        "vanilla",
+        "react",
+        "plotly"
+      ]
+    },
+    {
+      "id": "donut",
+      "name": "Donut chart",
+      "summary": "Shows how one total splits into a few parts at one moment, with the total in the middle.",
+      "goals": [
+        "part-of-whole"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "category",
+            "count": {
+              "min": 1,
+              "max": 1
+            },
+            "cardinality": {
+              "max": 30,
+              "ideal": 4
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "categoryFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "A donut splits a total into categories; there's no category column."
+        },
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": ">",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "Your data is a time series. A donut throws time away.",
+          "suggest": "stacked-bar"
+        },
+        {
+          "when": {
+            "metric": "hasNegatives",
+            "op": "=",
+            "value": true
+          },
+          "effect": "exclude",
+          "reason": "A donut can't show negative values; a share of a total can't be below zero.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": ">",
+            "value": 6
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "More than 6 slices are hard to compare by angle; the tail is folded into \"Other\".",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "=",
+                "value": "part-of-whole"
+              },
+              {
+                "metric": "sumsToWhole",
+                "op": "=",
+                "value": true
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.35,
+          "reason": "A few parts of one total, at one moment, is what a donut shows."
+        },
+        {
+          "when": {
+            "metric": "goal",
+            "op": "in",
+            "value": [
+              "compare",
+              "ranking"
+            ]
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "Angles are compared less accurately than bar lengths.",
+          "suggest": "bar-horizontal"
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "ok",
+          "card": "good",
+          "half": "good",
+          "full": "ok"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "poor"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "ok",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "bar-horizontal",
+          "when": "Exact comparison between parts matters."
+        },
+        {
+          "id": "stacked-bar",
+          "when": "The mix changes over time."
+        },
+        {
+          "id": "stacked-bar-100",
+          "when": "Comparing the mix across several groups."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
       "id": "kpi-tile-delta",
       "name": "KPI tile with change",
       "summary": "One headline number and how it changed since the previous period.",
@@ -1033,6 +1437,262 @@
       "code": [
         "echarts",
         "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "stacked-bar",
+      "name": "Stacked bar chart",
+      "summary": "Shows a total for each group and how it splits into a few parts, such as monthly revenue by channel.",
+      "goals": [
+        "part-of-whole",
+        "compare"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "category",
+            "count": {
+              "min": 1,
+              "max": 2
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "categoryFields",
+            "op": "<",
+            "value": 2
+          },
+          "effect": "penalty",
+          "weight": 0.5,
+          "reason": "Stacking needs a group and a part, e.g. month and channel. With one category, plain bars are clearer.",
+          "suggest": "bar-horizontal"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "metric": "goal",
+                "op": "in",
+                "value": [
+                  "part-of-whole",
+                  "compare"
+                ]
+              },
+              {
+                "metric": "categoryFields",
+                "op": ">=",
+                "value": 2
+              }
+            ]
+          },
+          "effect": "boost",
+          "weight": 0.4,
+          "reason": "Totals per group and their make-up, on one common baseline."
+        },
+        {
+          "when": {
+            "metric": "sumsToWhole",
+            "op": "=",
+            "value": true
+          },
+          "effect": "boost",
+          "weight": 0.15,
+          "reason": "Your parts add up to meaningful totals."
+        },
+        {
+          "when": {
+            "metric": "hasNegatives",
+            "op": "=",
+            "value": true
+          },
+          "effect": "penalty",
+          "weight": 0.3,
+          "reason": "Negative parts stack below zero, which is hard to read.",
+          "fix": "Show each part as its own bars, or separate gains and losses."
+        },
+        {
+          "when": {
+            "metric": "space",
+            "op": "=",
+            "value": "tile"
+          },
+          "effect": "exclude",
+          "reason": "Stacks and a legend don't fit in a KPI tile."
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "never",
+          "card": "ok",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "good",
+          "explore": "ok"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "good"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "stacked-bar-100",
+          "when": "Only the mix matters, not the totals."
+        },
+        {
+          "id": "grouped-bar",
+          "when": "Comparing the parts with each other matters more than the total."
+        },
+        {
+          "id": "donut",
+          "when": "One period only, five or fewer parts."
+        }
+      ],
+      "code": [
+        "echarts",
+        "recharts",
+        "plotly"
+      ]
+    },
+    {
+      "id": "top-n-table",
+      "name": "Top-N table",
+      "summary": "A ranked list with exact values, shares and inline bars, so you can read the numbers and see the gaps.",
+      "goals": [
+        "ranking",
+        "compare"
+      ],
+      "data": {
+        "fields": [
+          {
+            "role": "category",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          {
+            "role": "measure",
+            "count": {
+              "min": 1,
+              "max": 1
+            }
+          }
+        ],
+        "rows": {
+          "min": 1
+        }
+      },
+      "rules": [
+        {
+          "when": {
+            "metric": "categoryFields",
+            "op": "=",
+            "value": 0
+          },
+          "effect": "exclude",
+          "reason": "A ranking needs items to rank; there's no category column."
+        },
+        {
+          "when": {
+            "metric": "timeFields",
+            "op": ">",
+            "value": 0
+          },
+          "effect": "penalty",
+          "weight": 0.4,
+          "reason": "Your data runs over time; a ranking sums it and loses the trend.",
+          "suggest": "line"
+        },
+        {
+          "when": {
+            "metric": "goal",
+            "op": "=",
+            "value": "ranking"
+          },
+          "effect": "boost",
+          "weight": 0.45,
+          "reason": "A ranked list with exact values is what \"what sells best?\" needs."
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": ">",
+            "value": 8
+          },
+          "effect": "boost",
+          "weight": 0.2,
+          "reason": "Many items read better as rows than as bars."
+        },
+        {
+          "when": {
+            "metric": "maxLabelLength",
+            "op": ">",
+            "value": 20
+          },
+          "effect": "boost",
+          "weight": 0.1,
+          "reason": "Long names fit in table rows."
+        },
+        {
+          "when": {
+            "metric": "categories",
+            "op": "<",
+            "value": 4
+          },
+          "effect": "penalty",
+          "weight": 0.3,
+          "reason": "With only a few items, a bar chart says it faster.",
+          "suggest": "bar-horizontal"
+        }
+      ],
+      "context": {
+        "space": {
+          "tile": "poor",
+          "card": "good",
+          "half": "good",
+          "full": "good"
+        },
+        "audience": {
+          "glance": "ok",
+          "explore": "good"
+        },
+        "medium": {
+          "dashboard": "good",
+          "report": "good",
+          "slide": "ok"
+        }
+      },
+      "alternatives": [
+        {
+          "id": "bar-horizontal",
+          "when": "Exact values matter less than the shape of the ranking."
+        },
+        {
+          "id": "data-table",
+          "when": "Several columns per item, sorting and filtering."
+        }
+      ],
+      "code": [
+        "vanilla",
+        "react",
         "plotly"
       ]
     }

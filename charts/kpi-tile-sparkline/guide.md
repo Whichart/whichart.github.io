@@ -44,7 +44,7 @@ The default period is **28 days**, so weekdays line up with the previous period.
 | Outlier | "▲ 9×" instead of "+800%" |
 | Negative values | Sign kept; sign flips show the absolute change; dashed zero line |
 | Long label | Two lines, then ellipsis |
-| Large numbers | `৳1.6Cr` |
+| Large numbers | `৳51.3Cr` |
 | Gaps in time | Total over the days with data; sparkline breaks |
 | No previous period | "New" badge |
 

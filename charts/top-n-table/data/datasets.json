@@ -1,0 +1,98 @@
+{
+  "columns": [
+    "label",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Top products this month",
+      "nameLabel": "Product",
+      "valueLabel": "Revenue",
+      "locale": "en-US",
+      "currency": "USD"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Top products this month",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Top products this month",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Returns by product",
+        "nameLabel": "Product",
+        "valueLabel": "Returns",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Top products (trail runner launch)",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Profit by product",
+        "nameLabel": "Product",
+        "valueLabel": "Profit",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "manySeries": {
+      "file": "states/manySeries.csv",
+      "options": {
+        "label": "Top products this month",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Top products this month after refunds and marketplace fees",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Top products this month",
+        "nameLabel": "Product",
+        "valueLabel": "Revenue",
+        "locale": "en-IN",
+        "currency": "BDT"
+      }
+    }
+  }
+}

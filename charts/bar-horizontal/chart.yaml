@@ -1,0 +1,123 @@
+id: bar-horizontal
+name: Horizontal bar chart
+aliases: [bar chart, bar graph, horizontal bar graph, ranked bar chart, category comparison chart]
+status: ready
+summary: Compares one measure across categories with bars sorted largest first, so the order tells the story.
+
+goals: [compare, ranking]
+
+data:
+  fields:
+    - role: category
+      count: { min: 1, max: 1 }
+      cardinality: { max: 40, ideal: 8 }
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+  notes: Duplicate categories are summed; beyond 12 bars, the tail is folded into "Other".
+
+fit:
+  rules:
+    - when: { metric: categoryFields, op: "=", value: 0 }
+      effect: exclude
+      reason: Bars compare categories. Without a category column there's nothing to put on the bars.
+    - when: { metric: timeFields, op: ">", value: 0 }
+      effect: penalty
+      weight: 0.4
+      reason: Your data runs over time; summing it into bars loses the trend.
+      suggest: line
+    - when: { all: [{ metric: goal, op: "in", value: [compare, ranking] }, { metric: categoryFields, op: ">=", value: 1 }] }
+      effect: boost
+      weight: 0.4
+      reason: Bars on a common baseline are the most accurately compared shape.
+    - when: { metric: categories, op: "<", value: 2 }
+      effect: penalty
+      weight: 0.5
+      reason: One bar compares nothing.
+      suggest: kpi-tile-delta
+    - when: { metric: categories, op: ">", value: 12 }
+      effect: penalty
+      weight: 0.2
+      reason: Beyond 12 bars the tail is folded into "Other".
+      fix: Show the top items, or use a table for the full list.
+      suggest: top-n-table
+    - when: { metric: maxLabelLength, op: ">", value: 12 }
+      effect: boost
+      weight: 0.1
+      reason: Horizontal bars keep long category names readable.
+
+context:
+  space: { tile: poor, card: good, half: good, full: good }
+  audience: { glance: good, explore: good }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - Comparing a measure across products, channels, regions or teams.
+    - Category names are long; horizontal bars give them room.
+  avoidWhen:
+    - The x-axis is time. Use a line or column chart.
+    - Several measures per category. Use a grouped bar chart or a table.
+    - Readers need exact values for many categories. Use a table.
+  alternatives:
+    - id: top-n-table
+      when: Exact values matter as much as the ranking.
+    - id: stacked-bar
+      when: Each category splits into parts.
+    - id: dot-plot
+      when: Values are large and close together, so bar lengths look the same.
+  pitfalls:
+    - Never start the axis above zero; bar length is the value.
+    - Don't colour bars by value. One series, one colour; the length already shows the value.
+    - Sort by value unless the categories have a natural order (sizes, age bands).
+
+states:
+  empty:
+    treatment: message
+    description: Keep the frame; show a short message.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One labelled bar. If this is common, a KPI tile says it better.
+  allZeros:
+    treatment: adapt
+    description: Zero-length bars, each labelled 0, on a 0–1 axis.
+  outlier:
+    treatment: adapt
+    description: Linear scale kept; every bar is labelled so the short ones still have exact values.
+  negative:
+    treatment: render
+    description: Negative bars extend left from a zero line, labelled on the outside.
+  manySeries:
+    treatment: adapt
+    description: Beyond 12 categories, the top 11 stay and the rest are summed into "Other (n)".
+  longLabels:
+    treatment: adapt
+    description: Category names are truncated at 24 characters; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Labels and ticks use the locale's compact form (৳35.2Cr); the tooltip shows the full value.
+  timeGaps:
+    treatment: not-applicable
+    description: Categories have no time axis.
+  noPrevious:
+    treatment: not-applicable
+    description: A bar chart doesn't compare against a previous period.
+
+color:
+  job: single
+  maxSeries: 1
+
+accessibility:
+  tableFallback: true
+  labels: all
+  notes:
+    - Every bar carries its value, so the chart works without reading the axis.
+    - Sorted order makes the ranking clear to screen-reader users reading the labels in order.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [top-n-table, stacked-bar, dot-plot]

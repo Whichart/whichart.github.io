@@ -149,7 +149,7 @@ test('review: verdicts', () => {
   const bad = review('line', { csv: kpiSample });
   assert.equal(bad.verdict, 'avoid');
   assert.equal(bad.better[0].id, 'kpi-tile-delta');
-  assert.equal(review('donut', { csv: lineSample }).verdict, 'unknown');
+  assert.equal(review('radar-chart', { csv: lineSample }).verdict, 'unknown');
   const tile = review('line', { csv: lineSample, context: { space: 'tile' } });
   assert.ok(['ok', 'poor'].includes(tile.verdict));
   assert.ok(TILE_SIZED.includes(tile.better[0].id), tile.better[0].id);

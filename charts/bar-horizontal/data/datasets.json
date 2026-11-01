@@ -1,0 +1,80 @@
+{
+  "columns": [
+    "category",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Revenue by category",
+      "locale": "en-US",
+      "currency": "USD"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Revenue by category",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Revenue by category",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Returns by category",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Revenue by category (shoe launch)",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Profit by category",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "manySeries": {
+      "file": "states/manySeries.csv",
+      "options": {
+        "label": "Revenue by category",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Revenue by product category, after refunds and marketplace fees",
+        "locale": "en-US",
+        "currency": "USD"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Revenue by category",
+        "locale": "en-IN",
+        "currency": "BDT"
+      }
+    }
+  }
+}

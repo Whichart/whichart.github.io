@@ -121,8 +121,12 @@ export function echarts(tokens, mode) {
       endLabel: { color: m.ink.primary, textBorderWidth: 0 },
     },
     markPoint: { label: { color: m.ink.primary, textBorderWidth: 0 } },
-    bar: { itemStyle: { borderRadius: [tokens.marks.barRadius, tokens.marks.barRadius, 0, 0] } },
-    pie: { itemStyle: { borderColor: m.surface, borderWidth: tokens.marks.gap } },
+    bar: {
+      itemStyle: { borderRadius: [tokens.marks.barRadius, tokens.marks.barRadius, 0, 0] },
+      label: { color: m.ink.primary, textBorderWidth: 0 },
+    },
+    scatter: { label: { color: m.ink.primary, textBorderWidth: 0 } },
+    pie: { itemStyle: { borderColor: m.surface, borderWidth: tokens.marks.gap }, label: { color: m.ink.primary, textBorderWidth: 0 } },
     funnel: { itemStyle: { borderColor: m.surface, borderWidth: tokens.marks.gap } },
     visualMap: { inRange: { color: sequential(tokens, mode) }, textStyle: { color: m.ink.secondary } },
   };

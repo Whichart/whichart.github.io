@@ -1,0 +1,123 @@
+id: donut
+name: Donut chart
+aliases: [doughnut chart, ring chart, pie chart, donut graph, part to whole chart]
+status: ready
+summary: Shows how one total splits into a few parts at one moment, with the total in the middle.
+
+goals: [part-of-whole]
+
+data:
+  fields:
+    - role: category
+      count: { min: 1, max: 1 }
+      cardinality: { max: 30, ideal: 4 }
+    - role: measure
+      count: { min: 1, max: 1 }
+  rows: { min: 1 }
+  notes: Beyond 5 slices, the top 4 are kept and the rest summed into "Other". Values must be zero or more.
+
+fit:
+  rules:
+    - when: { metric: categoryFields, op: "=", value: 0 }
+      effect: exclude
+      reason: A donut splits a total into categories; there's no category column.
+    - when: { metric: timeFields, op: ">", value: 0 }
+      effect: exclude
+      reason: Your data is a time series. A donut throws time away.
+      suggest: stacked-bar
+    - when: { metric: hasNegatives, op: "=", value: true }
+      effect: exclude
+      reason: A donut can't show negative values; a share of a total can't be below zero.
+      suggest: bar-horizontal
+    - when: { metric: categories, op: ">", value: 6 }
+      effect: penalty
+      weight: 0.4
+      reason: More than 6 slices are hard to compare by angle; the tail is folded into "Other".
+      suggest: bar-horizontal
+    - when: { all: [{ metric: goal, op: "=", value: part-of-whole }, { metric: sumsToWhole, op: "=", value: true }] }
+      effect: boost
+      weight: 0.35
+      reason: A few parts of one total, at one moment, is what a donut shows.
+    - when: { metric: goal, op: "in", value: [compare, ranking] }
+      effect: penalty
+      weight: 0.4
+      reason: Angles are compared less accurately than bar lengths.
+      suggest: bar-horizontal
+
+context:
+  space: { tile: ok, card: good, half: good, full: ok }
+  audience: { glance: good, explore: poor }
+  medium: { dashboard: good, report: ok, slide: good }
+
+guidance:
+  useWhen:
+    - One total, 2–5 parts, one moment, such as this month's revenue by channel.
+    - The message is "one part dominates" or "it's roughly even".
+  avoidWhen:
+    - Comparing close values. People judge angles poorly; use bars.
+    - More than 5 parts, or parts that don't add up to a meaningful whole.
+    - Showing change over time. Use a stacked bar.
+  alternatives:
+    - id: bar-horizontal
+      when: Exact comparison between parts matters.
+    - id: stacked-bar
+      when: The mix changes over time.
+    - id: stacked-bar-100
+      when: Comparing the mix across several groups.
+  pitfalls:
+    - Never use 3D or exploded slices; they distort the angles.
+    - Without shares on the labels, readers guess percentages from angles; always show them.
+
+states:
+  empty:
+    treatment: message
+    description: A short message in place of the ring.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: A full ring for the one category, labelled 100%. A KPI tile usually says this better.
+  allZeros:
+    treatment: message
+    description: A ring of zeros has no shape, so it says so instead of drawing an empty circle.
+    message: Nothing to split yet
+  outlier:
+    treatment: render
+    description: One slice dominates, which is the message; small slices keep their shares in the legend.
+  negative:
+    treatment: message
+    description: A share can't be below zero, so it says so instead of drawing a misleading ring. Use bars.
+    message: A donut can’t show negative values
+  manySeries:
+    treatment: adapt
+    description: Beyond 5 slices, the top 4 stay and the rest are summed into "Other (n)".
+  longLabels:
+    treatment: adapt
+    description: Legend names are truncated at 22 characters; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: The centre total is compact in the locale (৳83.2Cr); the tooltip shows full values.
+  timeGaps:
+    treatment: not-applicable
+    description: A donut shows one moment.
+  noPrevious:
+    treatment: not-applicable
+    description: A donut doesn't compare against a previous period.
+
+color:
+  job: categorical
+  pairs: adjacent
+  maxSeries: 5
+
+accessibility:
+  tableFallback: true
+  labels: all
+  notes:
+    - Every slice is named with its share in the legend, so colour is never the only cue.
+    - Slices are separated by a 2px gap so adjacent colours don't merge.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [bar-horizontal, stacked-bar, stacked-bar-100]

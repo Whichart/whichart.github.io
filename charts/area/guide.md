@@ -32,7 +32,7 @@ An area chart is a line chart with the space below it filled. The fill adds one 
 | Outlier | Linear scale, highest point labelled |
 | Negative values | Fills to zero from both sides. Readable, but a line chart is better |
 | Long label | Title truncated at 40 characters; full name in the tooltip |
-| Large numbers | Locale-aware compact ticks: `৳24Cr` |
+| Large numbers | Locale-aware compact ticks: `৳54.1L` |
 | Gaps in time | Line and fill break at missing days |
 
 ## Code
