@@ -175,7 +175,8 @@ export function recommend(input: RecommendInput, charts: CatalogEntry[] = catalo
       const chosen = ctx[dim];
       if (!chosen) continue;
       const fit = (entry.context[dim] as Record<string, Suitability>)[chosen] ?? 'ok';
-      if (fit === 'never') blocks.push({ text: `Doesn't work for ${dim} "${chosen}".` });
+      // Only add the generic note when no rule has already explained why.
+      if (fit === 'never' && !blocks.length) blocks.push({ text: `Doesn't work for ${dim} "${chosen}".` });
       score += CONTEXT[fit];
       if (fit === 'poor') warnings.push({ text: `A poor fit for ${dim} "${chosen}".` });
     }

@@ -1,0 +1,72 @@
+{
+  "columns": [
+    "date",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Orders",
+      "locale": "en-US"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Orders",
+        "locale": "en-US"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Orders",
+        "locale": "en-US"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Orders",
+        "locale": "en-US"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Orders",
+        "locale": "en-US"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Net new subscribers",
+        "locale": "en-US"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Orders shipped from all warehouses, excluding cancellations",
+        "locale": "en-US"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Revenue",
+        "locale": "en-IN",
+        "currency": "BDT"
+      }
+    },
+    "timeGaps": {
+      "file": "states/timeGaps.csv",
+      "options": {
+        "label": "Orders",
+        "locale": "en-US"
+      }
+    }
+  }
+}

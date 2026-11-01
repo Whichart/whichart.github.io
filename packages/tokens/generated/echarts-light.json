@@ -121,6 +121,10 @@
     "label": {
       "color": "#0b0b0b",
       "textBorderWidth": 0
+    },
+    "endLabel": {
+      "color": "#0b0b0b",
+      "textBorderWidth": 0
     }
   },
   "markPoint": {

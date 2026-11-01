@@ -9,6 +9,7 @@
     "./tokens.json": "./tokens.json",
     "./whichart.css": "./generated/whichart.css",
     "./recharts": "./generated/recharts-theme.js",
+    "./palette.json": "./generated/palette.json",
     "./echarts-light.json": "./generated/echarts-light.json",
     "./echarts-dark.json": "./generated/echarts-dark.json",
     "./plotly-light.json": "./generated/plotly-light.json",

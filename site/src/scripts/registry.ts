@@ -3,6 +3,7 @@
 import * as echarts from 'echarts';
 import light from '@whichart/tokens/echarts-light.json';
 import dark from '@whichart/tokens/echarts-dark.json';
+import palette from '@whichart/tokens/palette.json';
 
 echarts.registerTheme('whichart-light', light);
 echarts.registerTheme('whichart-dark', dark);
@@ -29,7 +30,8 @@ export async function render(el: HTMLElement, id: string, rows: unknown[], optio
     if (path === echartsPath) {
       echarts.getInstanceByDom(el)?.dispose();
       const chart = echarts.init(el, `whichart-${currentMode()}`, { renderer: 'svg' });
-      chart.setOption(fn(rows, options));
+      // ECharts can't read CSS variables, so named colours (e.g. muted) are passed as options.palette.
+      chart.setOption(fn(rows, { ...options, palette: palette[currentMode()] }));
       const ro = new ResizeObserver(() => chart.resize());
       ro.observe(el);
       return () => {

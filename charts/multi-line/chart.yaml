@@ -1,0 +1,124 @@
+id: multi-line
+name: Multi-line chart
+aliases: [multiple line chart, multi-series line graph, line chart with several series, comparison line chart]
+status: ready
+summary: Compares how 2–5 measures or segments change over time, on one shared axis.
+
+goals: [trend, compare]
+
+data:
+  fields:
+    - role: time
+      count: { min: 1, max: 1 }
+    - role: measure
+      count: { min: 1, max: 8 }
+      description: One measure split by a category (long format), or several measures on the same scale.
+    - role: category
+      count: { min: 0, max: 1 }
+      description: The series, e.g. sales channel or region.
+  rows: { min: 1 }
+  notes: Beyond 5 series, the top 4 by total are kept and the rest are folded into "Other".
+
+fit:
+  rules:
+    - when: { metric: timeFields, op: "=", value: 0 }
+      effect: exclude
+      reason: Lines imply continuity over time. Without a time field the connecting lines mean nothing.
+      suggest: bar-horizontal
+    - when: { metric: series, op: "<", value: 2 }
+      effect: exclude
+      reason: There's only one series; the single-series line chart is simpler.
+      suggest: line
+    - when: { metric: series, op: ">", value: 5 }
+      effect: penalty
+      weight: 0.3
+      reason: More than 5 lines become a tangle; the smallest are folded into "Other".
+      fix: Show only the series that matter, or split into small multiples.
+    - when: { all: [{ metric: goal, op: "in", value: [trend, compare] }, { metric: series, op: ">=", value: 2 }, { metric: timeFields, op: "=", value: 1 }] }
+      effect: boost
+      weight: 0.4
+      reason: Several series over time, compared on one axis, is what a multi-line chart is for.
+    - when: { metric: pointsPerSeries, op: "<", value: 3 }
+      effect: penalty
+      weight: 0.5
+      reason: With fewer than 3 points per series there's no trend to compare.
+      suggest: bar-horizontal
+    - when: { metric: space, op: "=", value: tile }
+      effect: exclude
+      reason: Several lines and a legend don't fit in a KPI tile.
+
+context:
+  space: { tile: never, card: ok, half: good, full: good }
+  audience: { glance: ok, explore: good }
+  medium: { dashboard: good, report: good, slide: good }
+
+guidance:
+  useWhen:
+    - Comparing how 2–5 segments move over time, such as revenue by channel.
+    - The segments share a unit and a scale.
+  avoidWhen:
+    - The measures have different units or scales. Never add a second y-axis; use separate charts or index each to 100.
+    - More than 5 series. Fold the rest into "Other" or use small multiples.
+    - You care about the total and its parts. Use a stacked area or stacked bar.
+  alternatives:
+    - id: line
+      when: Only one series matters.
+    - id: small-multiples
+      when: Many series, each worth seeing on its own.
+    - id: stacked-bar
+      when: The parts add up to a meaningful total.
+  pitfalls:
+    - Colours follow the entity, never its rank. Filtering a series out must not repaint the others.
+    - Lines crossing often are hard to follow; highlight the one that matters.
+
+states:
+  empty:
+    treatment: message
+    description: Keep the frame and axes; show a short message in the plot area.
+    message: No data for this period
+  singlePoint:
+    treatment: adapt
+    description: One dot per series, with the legend naming them.
+  allZeros:
+    treatment: adapt
+    description: Flat lines on the baseline with a 0–1 axis instead of an invented scale.
+  outlier:
+    treatment: adapt
+    description: Linear scale kept so every series stays comparable; the spike is visible in its own colour.
+  negative:
+    treatment: render
+    description: The axis extends below zero and the x-axis sits on zero.
+  manySeries:
+    treatment: adapt
+    description: Beyond 5 series, the top 4 by total keep their colours and the rest are summed into "Other".
+  longLabels:
+    treatment: adapt
+    description: Legend names are truncated at 24 characters and end labels at 14; full names in the tooltip.
+  largeNumbers:
+    treatment: adapt
+    description: Locale-aware compact ticks; full values in the tooltip.
+  timeGaps:
+    treatment: adapt
+    description: Every line breaks at missing days.
+  noPrevious:
+    treatment: not-applicable
+    description: A multi-line chart doesn't compare against a previous period.
+
+color:
+  job: categorical
+  pairs: adjacent
+  maxSeries: 5
+
+accessibility:
+  tableFallback: true
+  labels: selective
+  notes:
+    - With up to 4 series each line is named at its end, so colour is never the only cue.
+    - A legend is always shown; the tooltip lists every series at the hovered date.
+
+code:
+  echarts: code/echarts.ts
+  recharts: code/recharts.tsx
+  plotly: code/plotly_figure.py
+
+related: [line, small-multiples, stacked-bar]

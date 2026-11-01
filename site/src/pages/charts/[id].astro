@@ -44,7 +44,12 @@ const playground = {
         {states.map((s) => <button class="chip" role="tab" aria-pressed="false" data-key={s.id}>{s.label}</button>)}
       </div>
       <div class="pg-stage">
-        <div class="pg-chart" id="pg-chart" data-kind={c.reference}>
+        <div
+          class="pg-chart"
+          id="pg-chart"
+          data-kind={c.reference}
+          style={c.doc.preview ? `height:${Math.round(c.doc.preview.height * 1.5)}px;max-width:${Math.round(c.doc.preview.width * 1.5)}px` : undefined}
+        >
           <Preview chart={c.id} alt={`${c.name} with sample data`} eager />
         </div>
       </div>
