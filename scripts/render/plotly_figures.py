@@ -50,6 +50,8 @@ def theme_colors(mode: str) -> dict:
         "secondary": m["ink"]["secondary"],
         "primary": m["ink"]["primary"],
         "surface": m["surface"],
+        # Low → high; dark mode flips the anchor so "near zero" recedes into the surface.
+        "sequential": TOKENS["sequential"]["blue"] if mode == "light" else TOKENS["sequential"]["blue"][::-1],
         "grid": m["grid"],
         # Meter tracks use a light step of the sequential ramp (dark mode: a dark step).
         "track": TOKENS["sequential"]["blue"][1] if mode == "light" else TOKENS["sequential"]["blue"][-2],

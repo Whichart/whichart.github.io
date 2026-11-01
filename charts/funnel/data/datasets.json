@@ -1,0 +1,64 @@
+{
+  "columns": [
+    "stage",
+    "value"
+  ],
+  "sample": {
+    "file": "sample.csv",
+    "options": {
+      "label": "Checkout funnel, last 30 days",
+      "locale": "en-US"
+    }
+  },
+  "states": {
+    "empty": {
+      "file": "states/empty.csv",
+      "options": {
+        "label": "Checkout funnel, last 30 days",
+        "locale": "en-US"
+      }
+    },
+    "singlePoint": {
+      "file": "states/singlePoint.csv",
+      "options": {
+        "label": "Checkout funnel, last 30 days",
+        "locale": "en-US"
+      }
+    },
+    "allZeros": {
+      "file": "states/allZeros.csv",
+      "options": {
+        "label": "Checkout funnel (store not launched)",
+        "locale": "en-US"
+      }
+    },
+    "outlier": {
+      "file": "states/outlier.csv",
+      "options": {
+        "label": "Checkout funnel (express checkout skips the cart)",
+        "locale": "en-US"
+      }
+    },
+    "negative": {
+      "file": "states/negative.csv",
+      "options": {
+        "label": "Checkout funnel, last 30 days",
+        "locale": "en-US"
+      }
+    },
+    "longLabels": {
+      "file": "states/longLabels.csv",
+      "options": {
+        "label": "Checkout funnel across web and app for all returning and new visitors",
+        "locale": "en-US"
+      }
+    },
+    "largeNumbers": {
+      "file": "states/largeNumbers.csv",
+      "options": {
+        "label": "Checkout funnel, last 30 days",
+        "locale": "en-IN"
+      }
+    }
+  }
+}

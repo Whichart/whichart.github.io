@@ -131,6 +131,24 @@ export function adapt(chart: string, rows: Row[], enc: Encoding): Adapted | null
     return { rows: out, options: { ...base, label: 'Your data', columns, sortBy: measure } };
   }
 
+  if (chart === 'funnel') {
+    const stage = enc.ordinal ?? enc.category;
+    if (!stage) return null;
+    return { rows: rows.map((r) => ({ stage: String(r[stage] ?? ''), value: parseNumber(r[measure]) })), options: { ...base, label: `${pretty(measure)} by ${pretty(stage).toLowerCase()}` } };
+  }
+
+  if (chart === 'cohort-heatmap' && enc.ordinal) {
+    // The numbered period (0, 1, 2…), the count of people, and the cohort (a date or a label).
+    const period = enc.ordinal;
+    const count = measure;
+    const cohort = Object.keys(rows[0] ?? {}).find((k) => k !== period && !enc.measures.includes(k));
+    if (!cohort) return null;
+    return {
+      rows: rows.map((r) => ({ cohort: String(r[cohort] ?? ''), period: parseNumber(r[period]) ?? 0, value: parseNumber(r[count]) })),
+      options: { ...base, label: `${pretty(count)} by ${pretty(cohort).toLowerCase()}` },
+    };
+  }
+
   if (chart === 'kpi-tile-delta') {
     if (enc.comparison && rows.length <= 1) {
       const r = rows[0];

@@ -18,7 +18,7 @@ data:
 
 fit:
   rules:
-    - when: { metric: categoryFields, op: "=", value: 0 }
+    - when: { all: [{ metric: categoryFields, op: "=", value: 0 }, { metric: ordinalFields, op: "=", value: 0 }] }
       effect: exclude
       reason: Bars compare categories. Without a category column there's nothing to put on the bars.
     - when: { metric: timeFields, op: ">", value: 0 }

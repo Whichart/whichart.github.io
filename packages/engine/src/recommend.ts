@@ -81,7 +81,10 @@ export function evaluate(c: Condition, p: Profile, goals: Goal[], ctx: Context):
 }
 
 function count(p: Profile, role: Role): number {
-  return role === 'measure' ? p.metrics.measureFields : p.columns.filter((c) => c.role === role).length;
+  if (role === 'measure') return p.metrics.measureFields;
+  // Ordered stages are categories too (a bar chart can show them in order); the reverse isn't true.
+  if (role === 'category') return p.columns.filter((c) => c.role === 'category' || (c.role === 'ordinal' && !c.because.startsWith('numbered periods'))).length;
+  return p.columns.filter((c) => c.role === role).length;
 }
 
 /** Hard data-shape requirements from chart.yaml `data`. Returns reasons it doesn't fit. */
@@ -107,6 +110,8 @@ function shapeProblems(entry: CatalogEntry, p: Profile): { exclude: string[]; ag
   return { exclude, aggregate };
 }
 
+const stageColumn = (p: Profile) => p.columns.find((c) => c.role === 'ordinal' && !c.because.startsWith('numbered periods'))?.name;
+
 function encodingFor(entry: CatalogEntry, p: Profile, aggregate = false): Encoding {
   const wants = new Set(entry.data.fields.map((f) => f.role));
   // A chart that summarises a time series (e.g. a KPI tile) needs the time column to summarise by.
@@ -117,7 +122,8 @@ function encodingFor(entry: CatalogEntry, p: Profile, aggregate = false): Encodi
     ...(wants.has('time') && first('time') ? { time: first('time') } : {}),
     measures: p.columns.filter((c) => c.role === 'measure' && !c.comparison).slice(0, maxMeasures).map((c) => c.name),
     ...(p.columns.find((c) => c.comparison) ? { comparison: p.columns.find((c) => c.comparison)!.name } : {}),
-    ...(wants.has('category') && first('category') ? { category: first('category') } : {}),
+    // Ordered stages can stand in for a category (bars in stage order); numbered periods can't.
+    ...(wants.has('category') && (first('category') ?? stageColumn(p)) ? { category: first('category') ?? stageColumn(p) } : {}),
     ...(wants.has('ordinal') && first('ordinal') ? { ordinal: first('ordinal') } : {}),
     ...(wants.has('geo') && first('geo') ? { geo: first('geo') } : {}),
   };

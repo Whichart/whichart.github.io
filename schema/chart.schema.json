@@ -478,6 +478,7 @@
         "maxLabelLength",
         "outlierRatio",
         "sumsToWhole",
+        "periodIndex",
         "goal",
         "space",
         "audience",

@@ -42,6 +42,8 @@ export interface Metrics {
   maxLabelLength: number;
   outlierRatio: number;
   sumsToWhole: boolean;
+  /** A numbered-period column (0, 1, 2… months since start): the shape of cohort data. */
+  periodIndex: boolean;
 }
 
 export interface Profile {
